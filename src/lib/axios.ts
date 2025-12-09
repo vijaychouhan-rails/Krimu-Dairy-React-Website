@@ -11,7 +11,7 @@ const getHeaders = () => {
     appversion: 512,
     ISCLONEAPP: true,
     CUSTOMERAPP: true,
-    APPKEY: "d41d8$cD97fC0bK04@9800998ecf8427e"
+    APPKEY: "1234567890"
     // 'content-type': 'application/x-www-form-urlencoded'
   };
 };

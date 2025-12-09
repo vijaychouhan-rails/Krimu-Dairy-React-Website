@@ -6,11 +6,12 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import Link from "next/link";
+import Image from "next/image";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GET_ESTORE_DASHBOARD_DATA } from "@/constants/queryName";
 import { getDashboardData } from "@/services/dashboardService";
 import { useDispatch, useSelector } from "react-redux";
-import {RootState} from "@/store/store";
+import { RootState } from "@/store/store";
 import { parseCookies } from 'nookies';
 import { destroyCookies, fetchAuth, getCookies } from "@/lib/appCookies";
 import { logoutOperation } from "@/services/auth";
@@ -18,24 +19,20 @@ import showErrorMessages from "@/lib/errorHandle";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { clearCart } from "@/store/cartSlice";
+import logo from "../../assets/logo.png";
 
-
-const Header: React.FC = () => {
-
-  //  const [hydrated, setHydrated] = useState(false);
-  // useEffect(() => setHydrated(true), []);
-  // if (!hydrated) return null;
+const HeaderContent: React.FC = () => {
 
   const latitude = "22.6883834";
   const longitude = "75.8284917";
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const cartCount = cartItems.length;
-  
+
   const authData = fetchAuth();
   const isLoggedIn = authData.isLoggedIn;
   const user = authData.user_name;
-  
-  const logoutAuthMutation = useMutation({mutationFn: () => logoutOperation()});
+
+  const logoutAuthMutation = useMutation({ mutationFn: () => logoutOperation() });
   const dispatch = useDispatch();
 
   const { data } = useQuery({
@@ -79,10 +76,15 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-primary to-accent w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-              D
+            <div className="bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center text-white font-bold text-xl">
+              <Image
+                src={logo}
+                alt={"logo"}
+                width={80}
+                height={80}
+                className="bg-gradient-to-r from-primary to-accent w-20 h-20 w-fit  rounded-lg flex items-center justify-center text-white font-bold text-xl"
+              />
             </div>
-            <span className="text-xl font-bold text-foreground">DairyFresh</span>
           </Link>
 
           {/* Navigation */}
@@ -90,8 +92,8 @@ const Header: React.FC = () => {
             <Link href="/" className="text-foreground hover:text-primary transition-colors">
               Home
             </Link>
-            <Link href="/categories" className="text-foreground hover:text-primary transition-colors">
-              Categories
+            <Link href="/products" className="text-foreground hover:text-primary transition-colors">
+              Products
             </Link>
             <Link href="/orders" className="text-foreground hover:text-primary transition-colors">
               My Orders
@@ -112,28 +114,28 @@ const Header: React.FC = () => {
           {/* Actions */}
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
-            <>
-              <div>
+              <>
+                <div>
+                  <Button variant="ghost" size="sm" className="hidden md:flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span>{user || "Profile"}</span>
+                  </Button>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex items-center space-x-2">
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <Link href="/login">
                 <Button variant="ghost" size="sm" className="hidden md:flex items-center space-x-2">
                   <User className="h-4 w-4" />
-                  <span>{user || "Profile"}</span>
+                  <span>Login</span>
                 </Button>
-              </div>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex items-center space-x-2">
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </Button>
-            </> 
-          ) : (
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="hidden md:flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span>Login</span>
-              </Button>
-            </Link>
-          )}
+              </Link>
+            )}
 
-              <Link href="/cart">
+            <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4" />
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs bg-primary">
@@ -150,6 +152,15 @@ const Header: React.FC = () => {
       </div>
     </header>
   );
+};
+
+const Header: React.FC = () => {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
+  if (!hydrated) return null;
+
+  return <HeaderContent />;
 };
 
 export default Header;
