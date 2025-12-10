@@ -9,12 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Separator } from "../components/ui/separator";
 import Link from "next/link";
-import { login } from "@/services/auth";
+import { login, register, verifyOtp } from "@/services/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authWrapper } from "@/lib/authWrapper";
 import { useQueryClient } from "@tanstack/react-query";
 import showErrorMessages from "@/lib/errorHandle";
 import { BiMobile } from "react-icons/bi";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "../components/ui/input-otp";
 
 const LoginRegister = () => {
   // Login state
@@ -25,12 +27,14 @@ const LoginRegister = () => {
 
   // Register state
   const [fullName, setFullName] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerMobileNo, setRegisterMobileNo] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
+
+  // OTP modal state
+  const [isOtpOpen, setIsOtpOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
 
   const route = useRouter();
   const searchParams = useSearchParams();
@@ -60,20 +64,47 @@ const LoginRegister = () => {
     e.preventDefault();
     setRegisterError(null);
 
-    if (!fullName || !registerEmail || !registerPassword || !confirmPassword) {
+    if (!fullName || !registerMobileNo || !registerPassword) {
       setRegisterError("All fields are required.");
       return;
     }
 
-    if (registerPassword !== confirmPassword) {
-      setRegisterError("Passwords do not match.");
-      return;
-    }
 
-    // Call your register API here
-    console.log({ fullName, registerEmail, registerPassword });
+    const result = await register({
+      name: fullName,
+      mobileNo: registerMobileNo,
+      password: registerPassword,
+      role: "buyer_customer",
+    });
+
+    if (result?.success) {
+      setIsOtpOpen(true);
+    } else {
+      showErrorMessages({ error: result.error, action: "auth" });
+    }
   };
 
+  const handleOtpSubmit = async () => {
+    if (!otpValue || !registerMobileNo || !fullName || !registerPassword) return;
+
+    const result = await verifyOtp({
+      mobileNo: registerMobileNo,
+      otp: otpValue,
+      name: fullName,
+      password: registerPassword,
+      role: "buyer_customer",
+    });
+
+    debugger
+
+    if (result?.success) {
+
+      setIsOtpOpen(false);
+      window.location.replace(redirectTo);
+    } else {
+      showErrorMessages({ error: result.error, action: "auth" });
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -172,17 +203,17 @@ const LoginRegister = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="registerEmail">Mobile Number</Label>
+                      <Label htmlFor="registerMobileNo">Mobile Number</Label>
                       <div className="relative">
                         <BiMobile className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                         <Input
-                          id="mobileNo"
+                          id="registerMobileNo"
                           type="tel"
                           placeholder="Enter your mobile number"
                           className="pl-10"
                           maxLength={10}
-                          value={mobileNo}
-                          onChange={(e) => setMobileNo(e.target.value)}
+                          value={registerMobileNo}
+                          onChange={(e) => setRegisterMobileNo(e.target.value)}
                           required
                         />
                       </div>
@@ -213,30 +244,7 @@ const LoginRegister = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                        <Input
-                          id="confirmPassword"
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Confirm your password"
-                          className="pl-10 pr-10"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          required
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </div>
+
 
                     {registerError && <p className="text-red-500 text-sm">{registerError}</p>}
 
@@ -250,6 +258,35 @@ const LoginRegister = () => {
           </Card>
         </div>
       </div>
+      <Dialog open={isOtpOpen} onOpenChange={setIsOtpOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter OTP</DialogTitle>
+            <DialogDescription>
+              We have sent an OTP to your mobile number. Please enter it below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <InputOTP maxLength={5} value={otpValue} onChange={setOtpValue}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <Button type="button" variant="outline" className="mr-2" onClick={() => setIsOtpOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleOtpSubmit} disabled={!otpValue}>
+              Verify OTP
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
