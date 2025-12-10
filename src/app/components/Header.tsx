@@ -21,12 +21,15 @@ import { useEffect, useState } from "react";
 import { clearCart } from "@/store/cartSlice";
 import { setLocation } from "@/store/locationSlice";
 import logo from "../../assets/logo.png";
+import { usePathname } from "next/navigation";
 
 const HeaderContent: React.FC = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const { latitude, longitude } = useSelector(
     (state: RootState) => state.location
   );
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const cartCount = cartItems.length;
 
   const authData = fetchAuth();
@@ -39,7 +42,7 @@ const HeaderContent: React.FC = () => {
   const { data } = useQuery({
     queryKey: ["dashboardTopMessage", latitude, longitude],
     queryFn: () => getDashboardData({ page: 1, latitude, longitude }),
-    enabled: !!latitude && !!longitude,
+    enabled: isHomePage && !!latitude && !!longitude,
   });
 
   const topMessage = data?.top_message ?? "";
