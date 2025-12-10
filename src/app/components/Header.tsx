@@ -19,13 +19,14 @@ import showErrorMessages from "@/lib/errorHandle";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { clearCart } from "@/store/cartSlice";
+import { setLocation } from "@/store/locationSlice";
 import logo from "../../assets/logo.png";
 
 const HeaderContent: React.FC = () => {
-
-  const latitude = "22.6883834";
-  const longitude = "75.8284917";
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const { latitude, longitude } = useSelector(
+    (state: RootState) => state.location
+  );
   const cartCount = cartItems.length;
 
   const authData = fetchAuth();
@@ -38,9 +39,35 @@ const HeaderContent: React.FC = () => {
   const { data } = useQuery({
     queryKey: ["dashboardTopMessage", latitude, longitude],
     queryFn: () => getDashboardData({ page: 1, latitude, longitude }),
+    enabled: !!latitude && !!longitude,
   });
 
   const topMessage = data?.top_message ?? "";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        dispatch(
+          setLocation({
+            latitude: String(lat),
+            longitude: String(lng),
+          })
+        );
+      },
+      () => {
+        dispatch(
+          setLocation({
+            latitude: "22.6883834",
+            longitude: "75.8284917",
+          })
+        );
+      }
+    );
+  }, [dispatch]);
 
   const handleLogout = () => {
     logoutAuthMutation.mutate(undefined, {

@@ -41,10 +41,7 @@ export type DashboardData = {
     top_message: string;
 }
 
-export type DashboardProps = {
-  latitude: string;
-  longitude: string;
-}
+// Dashboard now reads latitude/longitude from Redux store instead of props
 
 export type DeliveryStatus = "pending" | "delivered" | "cancelled";
 

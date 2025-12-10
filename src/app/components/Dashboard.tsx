@@ -4,21 +4,22 @@ import { ArrowRight, Truck, Shield, Leaf, Star } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import heroDairy from "../assets/hero-dairy.jpg";
-import freshMilk from "../assets/fresh-milk.jpg";
-import freshCurd from "../assets/fresh-curd.jpg";
-import artisanCheese from "../assets/artisan-cheese.jpg";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from './ui/badge';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getDashboardData } from '@/services/dashboardService';
 import {GET_ESTORE_DASHBOARD_DATA} from "@/constants/queryName"
-import { DashboardData, DashboardProps } from '../types';
+import { DashboardData } from '../types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import showErrorMessages from '@/lib/errorHandle';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
 
-function Dashboard(props: DashboardProps) {
-  const {latitude, longitude} = props;
+function Dashboard() {
+  const { latitude, longitude } = useSelector(
+    (state: RootState) => state.location
+  );
   const features = [
     {
       icon: Truck,
@@ -52,6 +53,7 @@ function Dashboard(props: DashboardProps) {
     queryFn: ({ pageParam = 1 }):Promise<DashboardData> =>
       getDashboardData({ page: pageParam, latitude, longitude }),
     initialPageParam: 1,
+    enabled: !!latitude && !!longitude,
     getNextPageParam: (lastPage) => lastPage?.meta?.next_page ?? undefined,
     retry: false,
     // getNextPageParam: (lastPage: DashboardData) => {
@@ -228,7 +230,10 @@ function Dashboard(props: DashboardProps) {
           >
             {categoryProducts.map((category) => (
               <div key= {category.id} className="mb-12">
-                <h3 className="text-2xl font-semibold mb-4">{category.category}</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-2xl font-semibold mb-4">{category.category}</h3>
+                  <Link href={`/category/${category.id}`}>view all</Link>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {category.products.map((product: any) => (
                     <Card key={product.id} className="group hover:shadow-card transition-all duration-300">
@@ -270,13 +275,7 @@ function Dashboard(props: DashboardProps) {
                     </Card>
                   ))}
 
-                  <Card className="group hover:shadow-card transition-all duration-300">
-                    <CardContent className=''>
-                      <div >
-                        View All
-                      </div>
-                    </CardContent>
-                  </Card>
+                 
                 </div>
               </div>
             ))}
