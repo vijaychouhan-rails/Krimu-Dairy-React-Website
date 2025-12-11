@@ -31,3 +31,8 @@ export async function fetchCategoryProducts({
 
   return response.data;
 }
+
+export async function fetchProductById(id: number | string) {
+  const response = await axios.get(`/api/v2/bc/estore/products/${id}`);
+  return response.data;
+}

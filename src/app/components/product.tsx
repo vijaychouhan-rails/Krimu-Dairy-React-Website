@@ -9,28 +9,19 @@ import {
   Truck,
   Shield,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import freshMilk from "../assets/fresh-milk.jpg";
-import freshCurd from "../assets/fresh-curd.jpg";
-import artisanCheese from "../assets/artisan-cheese.jpg";
+import { Tabs, TabsContent, TabsList } from "./ui/tabs";
+import freshMilk from "../../assets/fallback.png";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { addItem } from "@/store/cartSlice";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/autoplay";
-import { Autoplay, Navigation } from "swiper/modules";
-import { Product } from "../types";
+import { fetchProductById } from "@/services/productService";
 
 const ProductDetail = () => {
   const { id } = useParams<{id: string}>();
@@ -42,26 +33,51 @@ const ProductDetail = () => {
   const router = useRouter();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
-  // Read localStorage safely in useEffect
+  // Fetch product details by ID
   useEffect(() => {
-    const storedData = localStorage.getItem(id);
-    if (storedData) {
-      const data = JSON.parse(storedData);
-      setProductData(data);
-    }
+    if (!id) return;
+
+    const loadProduct = async () => {
+      try {
+        const data = await fetchProductById(id);
+        setProductData(data);
+      } catch (error) {
+        console.error("Failed to load product details", error);
+      }
+    };
+
+    loadProduct();
   }, [id]);
 
   if (!productData) {
-    return <div>Loading...</div>; // or skeleton loader
+    return <div>Loading...</div>;
   }
 
-  const product = productData.product;
-  const c = productData.category;
-  const relatedProducts = c?.products.filter((p: Product) => p.id !== product.id)
-  
-  // Mock productImages data
-  const productImages = [freshMilk, freshCurd, artisanCheese]
-  const isAlreadyInCart = cartItems.some( p => p.id === product?.id)
+  const product = productData.data;
+
+  const productImages: string[] = (() => {
+    const images: string[] = [];
+
+    if (product?.pic) {
+      images.push(product.pic);
+    }
+
+    if (Array.isArray(productData.product_images)) {
+      productData.product_images.forEach((img: { image_url?: string | null }) => {
+        if (img?.image_url) {
+          images.push(img.image_url);
+        }
+      });
+    }
+
+    if (!images.length) {
+      images.push(freshMilk as unknown as string);
+    }
+
+    return images;
+  })();
+
+  const isAlreadyInCart = cartItems.some((p) => p.id === product?.id);
 
   const handleAddToCart = () => {
     if (!product) return null;
@@ -73,7 +89,7 @@ const ProductDetail = () => {
         price: product.price,
         quantity,
         image: product.pic,
-        category: c?.category,
+        category: product.product_category_name,
       })
     );
     
@@ -117,7 +133,7 @@ const ProductDetail = () => {
           <div className="space-y-4">
             <div className="aspect-square rounded-lg overflow-hidden bg-muted">
               <Image
-                src={product.pic || freshMilk}
+                src={productImages[selectedImage] || productImages[0]}
                 alt={product.product_name}
                 className="w-full h-full object-cover"
                 width={400}
@@ -141,6 +157,8 @@ const ProductDetail = () => {
                     src={image}
                     alt=""
                     className="w-full h-full object-cover"
+                    width={64}
+                    height={64}
                   />
                 </button>
               ))}
@@ -151,7 +169,7 @@ const ProductDetail = () => {
           <div className="space-y-6">
             <div>
               <Badge variant="secondary" className="mb-2">
-                {c.category}
+                {product.product_category_name || ""}
               </Badge>
               <h1 className="text-3xl font-bold">{product.product_name}</h1>
               <p className="textcategoryProducts-muted-foreground mt-2">
@@ -266,7 +284,7 @@ const ProductDetail = () => {
                   </div> */}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Category:</span>
-                    <span>{c.category}</span>
+                    <span>{product.product_category_name || ""}</span>
                   </div>
                 </div>
               </CardContent>
@@ -328,104 +346,7 @@ const ProductDetail = () => {
           </Tabs>
         </div>
 
-        {/* Related Products */}
-        <div className="mt-16">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Related Products</h2>
-
-            {/* Custom Navigation */}
-            <div className="flex space-x-2">
-              <button className="related-prev-btn w-10 h-10 bg-background border rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button className="related-next-btn w-10 h-10 bg-background border rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="relative">
-            <Swiper
-              modules={[Navigation, Autoplay]}
-              navigation={{
-                nextEl: ".related-next-btn",
-                prevEl: ".related-prev-btn",
-              }}
-              loop={true}
-              autoplay={{
-                delay: 3000,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-                stopOnLastSlide: false, // Don't stop on last slide when looping
-              }}
-              spaceBetween={24}
-              slidesPerView={4}
-              speed={600}
-              breakpoints={{
-                640: { slidesPerView: 2, spaceBetween: 20 },
-                768: { slidesPerView: 3, spaceBetween: 20 },
-              }}
-            >
-              {relatedProducts.map((relatedProduct: any) => (
-                <SwiperSlide key={relatedProduct.id} className="!h-auto">
-                  <Card className="group hover:shadow-card transition-all duration-300 hover:-translate-y-1 h-full border-2 hover:border-primary/20">
-                    <CardContent className="p-0 h-full flex flex-col">
-                      <Link
-                        href={`/product/${relatedProduct.id}`}
-                        className="flex flex-col h-full"
-                        onClick={() => productItem(c, relatedProduct)}
-                      >
-                        <div className="relative overflow-hidden rounded-t-lg bg-muted/50">
-                          <Image
-                            src={relatedProduct.pic || freshMilk}
-                            alt={relatedProduct.product_name}
-                            className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                            width={400}
-                            height={400}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-
-                        <div className="p-4 flex-1 flex flex-col">
-                          <div className="mb-2">
-                            <Badge variant="secondary" className="mb-2">
-                              {relatedProduct.category}
-                            </Badge>
-                            <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                              {relatedProduct.product_name}
-                            </h3>
-                          </div>
-
-                          <p className="text-muted-foreground text-sm mb-4 flex-1 line-clamp-2">
-                            {relatedProduct.detail ||
-                              "Discover this amazing product"}
-                          </p>
-
-                          <div className="flex items-center justify-between mt-auto pt-4 border-t">
-                            <div>
-                              <span className="text-2xl font-bold text-primary">
-                                ₹ {relatedProduct.price}
-                              </span>
-                              {relatedProduct.originalPrice && (
-                                <span className="text-sm text-muted-foreground line-through ml-2">
-                                  ₹ {relatedProduct.originalPrice}
-                                </span>
-                              )}
-                            </div>
-                            <Button size="sm" className="shrink-0">
-                              <ShoppingCart className="h-4 w-4 mr-1" />
-                              Add
-                            </Button>
-                          </div>
-                        </div>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </div>
+        {/* Related Products: requires separate API, currently disabled */}
       </div>
     </div>
   );

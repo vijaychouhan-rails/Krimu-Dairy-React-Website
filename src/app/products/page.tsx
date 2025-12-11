@@ -11,15 +11,17 @@ import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchCategoryProducts, fetchProductCategories } from "@/services/productService";
 import InfiniteScroll from "react-infinite-scroll-component";
-import FreshMilk from "../assets/fresh-milk.jpg";
+import FreshMilk from "../../assets/fallback.png";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
+import { useSearchParams } from "next/navigation";
 const Categories = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
   );
   const [hasSetDefaultCategory, setHasSetDefaultCategory] = useState(false);
+  const searchParams = useSearchParams();
   const { latitude, longitude } = useSelector(
     (state: RootState) => state.location
   );
@@ -32,17 +34,29 @@ const Categories = () => {
     queryFn: fetchProductCategories,
   });
 
-  const categories = [
-    ...(categoriesData ?? []),
-    { id: null, name: "Others" },
-  ];
+  const baseCategories = categoriesData ?? [];
+  const categories = baseCategories.length
+    ? [...baseCategories, { id: null, name: "Others" }]
+    : [];
 
   useEffect(() => {
-    if (categories.length && !hasSetDefaultCategory) {
-      setSelectedCategoryId(categories[0].id);
-      setHasSetDefaultCategory(true);
+    if (!categories.length || hasSetDefaultCategory) return;
+
+    const categoryIdParam = searchParams.get("categoryId");
+    const parsedId = categoryIdParam ? Number(categoryIdParam) : null;
+
+    if (parsedId !== null && !Number.isNaN(parsedId)) {
+      const matchedCategory = categories.find((cat) => cat.id === parsedId);
+      if (matchedCategory) {
+        setSelectedCategoryId(matchedCategory.id);
+        setHasSetDefaultCategory(true);
+        return;
+      }
     }
-  }, [categories, hasSetDefaultCategory]);
+
+    setSelectedCategoryId(categories[0].id);
+    setHasSetDefaultCategory(true);
+  }, [categories, hasSetDefaultCategory, searchParams]);
 
   const {
     data,
@@ -179,7 +193,7 @@ const Categories = () => {
                     <Link href={`/product/${product.id}`}>
                       <div className="relative overflow-hidden rounded-t-2xl">
                         <Image
-                          src={product.image_url || FreshMilk}
+                          src={product.pic || FreshMilk}
                           alt={product.product_name}
                           width={400}
                           height={300}

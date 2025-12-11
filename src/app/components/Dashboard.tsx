@@ -15,6 +15,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import showErrorMessages from '@/lib/errorHandle';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
+import fallbackImage from "../../assets/fallback.png";
 
 function Dashboard() {
   const { latitude, longitude } = useSelector(
@@ -77,16 +78,6 @@ function Dashboard() {
     return nonOtherCatProducts
   }, [data?.pages, hasNextPage]);
 
-  const productItem = (category:  any, product: any) => {
-    if (typeof window !== 'undefined') {
-
-      localStorage.clear();
-      localStorage.setItem(product.id.toString(), JSON.stringify({
-        product: product,
-        category: category,
-      }));
-    }
-  };
 
   useEffect(()=> {
     if (error) showErrorMessages({ error: error });
@@ -181,7 +172,13 @@ function Dashboard() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {categories.map((category) => (
-              <Link key={category.name} href="/products">
+              <Link
+                key={category.name}
+                href={{
+                  pathname: "/products",
+                  query: { categoryId: category.id },
+                }}
+              >
                 <Card className="group hover:shadow-card transition-all duration-300 hover:-translate-y-1">
                   <CardContent className="p-6 text-center">
                     {category.category_image_url ? (
@@ -239,7 +236,6 @@ function Dashboard() {
                     <Card key={product.id} className="group hover:shadow-card transition-all duration-300">
                       <CardContent className="p-0">
                         <Link href={`/product/${product.id}`}
-                          onClick={() => productItem(category, product)}
                         >
                           <div className="relative overflow-hidden rounded-t-lg">
                             {product.pic ? (
@@ -255,7 +251,16 @@ function Dashboard() {
                               />
                             ) : (
                               <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
-                                🛒
+                                <Image
+                                src={fallbackImage}
+                                alt={product.product_name}
+                                className={`w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300`}
+                                width={400} 
+                                height={400} 
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                                />
                               </div>
                             )}
                             <Badge className="absolute top-4 left-4 bg-card text-card-foreground">
@@ -265,6 +270,11 @@ function Dashboard() {
                           <div className="p-6">
                             <h3 className="text-xl font-semibold mb-2">{product.product_name}</h3>
                             <p className="text-muted-foreground mb-4">{product.detail || "No details available"}</p>
+                            {product.in_stock === false && (
+                              <Badge variant="destructive" className="mb-2">
+                                Out of stock
+                              </Badge>
+                            )}
                             <div className="flex items-center justify-between">
                               <span className="text-2xl font-bold text-primary">₹{product.price}</span>
                               <Button>Add to Cart</Button>
