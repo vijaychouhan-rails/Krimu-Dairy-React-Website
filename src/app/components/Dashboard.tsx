@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { ArrowRight, Truck, Shield, Leaf, Star } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -10,7 +10,7 @@ import { Badge } from './ui/badge';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getDashboardData } from '@/services/dashboardService';
 import {GET_ESTORE_DASHBOARD_DATA} from "@/constants/queryName"
-import { DashboardData } from '../types';
+import { DashboardData, Product } from '../types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import showErrorMessages from '@/lib/errorHandle';
 import { useSelector } from 'react-redux';
@@ -219,20 +219,22 @@ function Dashboard() {
             next={fetchNextPage}
             hasMore={!!hasNextPage}
             loader={<h4 className="text-center">Loading more products...</h4>}
-            endMessage={
-              <p className="text-center mt-4">
-                <b>All products loaded!</b>
-              </p>
-            }
           >
             {categoryProducts.map((category) => (
               <div key= {category.id} className="mb-12">
                 <div className="flex justify-between items-center">
                   <h3 className="text-2xl font-semibold mb-4">{category.category}</h3>
-                  <Link href={`/category/${category.id}`}>view all</Link>
+                  <Link
+                    href={{
+                      pathname: "/products",
+                      query: { categoryId: category.id },
+                    }}
+                  >
+                    view all
+                  </Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {category.products.map((product: any) => (
+                  {category.products.map((product: Product) => (
                     <Card key={product.id} className="group hover:shadow-card transition-all duration-300">
                       <CardContent className="p-0">
                         <Link href={`/product/${product.id}`}
@@ -293,30 +295,11 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-16 bg-gradient-to-r from-primary to-primary-hover text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Demo</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Labore, magni minima numquam fugiat quaerat iure debitis, a consectetur obcaecati temporibus odit distinctio ullam tempore velit! Distinctio totam quia sequi vel.
-          </p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-foreground"
-            />
-            <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90">
-              Subscribe
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-card py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="bg-gradient-to-r from-primary to-accent w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xl">
@@ -334,14 +317,6 @@ function Dashboard() {
                 <Link href="/products" className="block text-muted-foreground hover:text-primary">Products</Link>
                 <Link href="/about" className="block text-muted-foreground hover:text-primary">About Us</Link>
                 <Link href="/contact" className="block text-muted-foreground hover:text-primary">Contact</Link>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Categories</h3>
-              <div className="space-y-2">
-                <Link href="/products" className="block text-muted-foreground hover:text-primary">Milk</Link>
-                <Link href="/products" className="block text-muted-foreground hover:text-primary">Cheese</Link>
-                <Link href="/products" className="block text-muted-foreground hover:text-primary">Yogurt</Link>
               </div>
             </div>
             <div>

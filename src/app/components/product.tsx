@@ -22,13 +22,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { addItem } from "@/store/cartSlice";
 import { fetchProductById } from "@/services/productService";
+import type { Product } from "../types";
 
 const ProductDetail = () => {
   const { id } = useParams<{id: string}>();
   const dispatch = useDispatch<AppDispatch>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [productData, setProductData] = useState<any>(null);
+  const [productData, setProductData] = useState<{
+    data: Product;
+    product_images?: { image_url?: string | null }[];
+  } | null>(null);
 
   const router = useRouter();
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -89,19 +93,11 @@ const ProductDetail = () => {
         price: product.price,
         quantity,
         image: product.pic,
-        category: product.product_category_name,
+        category: product.product_category_name ?? "",
       })
     );
     
     router.push("/cart")
-  };
-
-  const productItem = (category:  any, product: any) => {
-    localStorage.clear();
-    localStorage.setItem(product.id.toString(), JSON.stringify({
-      product: product,
-      category: category,
-    }));
   };
 
   return (

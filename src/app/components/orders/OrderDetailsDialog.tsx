@@ -12,7 +12,6 @@ import { Calendar, Package, Truck, X } from "lucide-react";
 import { format } from "date-fns";
 import { Separator } from "../../components/ui/separator";
 import { toast } from "react-toastify";
-toast
 interface OrderDetailsDialogProps {
   order: Order | null;
   open: boolean;

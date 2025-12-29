@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Filter, Grid, List } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -15,6 +16,7 @@ import FreshMilk from "../../assets/fallback.png";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useSearchParams } from "next/navigation";
+
 const Categories = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
@@ -107,7 +109,7 @@ const Categories = () => {
                     Loading categories...
                   </div>
                 ) : (
-                  categories.map((category: any) => (
+                  categories.map((category) => (
                     <div
                       key={category.id}
                       className="flex items-center space-x-2"
@@ -172,11 +174,6 @@ const Categories = () => {
                 <div className="text-center py-6 text-muted-foreground">
                   Loading more products...
                 </div>
-              }
-              endMessage={
-                <p className="text-center py-6 text-muted-foreground">
-                  <b>All products loaded!</b>
-                </p>
               }
               className={`grid gap-6 ${
                 viewMode === "grid"
@@ -247,4 +244,10 @@ const Categories = () => {
   );
 };
 
-export default Categories;
+const ProductsPage = () => (
+  <Suspense fallback={null}>
+    <Categories />
+  </Suspense>
+);
+
+export default ProductsPage;

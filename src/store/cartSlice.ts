@@ -52,7 +52,7 @@ const cartSlice = createSlice({
             }
             saveCartToLocalStorage(state.items);
         },
-        removeItem: (state, action: PayloadAction<Number>) => {
+        removeItem: (state, action: PayloadAction<number>) => {
            state.items = state.items.filter(i => i.id !== action.payload);
            saveCartToLocalStorage(state.items);
         },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Eye, EyeOff, User, Mail, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -291,4 +291,10 @@ const LoginRegister = () => {
   );
 };
 
-export default authWrapper(LoginRegister);
+const LoginRegisterPage = () => (
+  <Suspense fallback={null}>
+    <LoginRegister />
+  </Suspense>
+);
+
+export default authWrapper(LoginRegisterPage);

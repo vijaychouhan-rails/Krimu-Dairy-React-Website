@@ -20,9 +20,6 @@ const geistMono = Geist_Mono({
 
 const queryClient = new QueryClient();
 
-// const latitude = "22.6883834";
-// const longitude = "75.8284917";
-
 export default function RootLayout({
   children,
 }: Readonly<{

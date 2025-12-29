@@ -124,7 +124,7 @@ const MyOrders = () => {
   // );
 
   if (isError) {
-    const axiosError = error as any;
+    const axiosError = error as { response?: { data?: { errors?: string[] } } } | null;
     showErrorMessages({ error: axiosError?.response?.data?.errors });
     router.replace("/");
   }

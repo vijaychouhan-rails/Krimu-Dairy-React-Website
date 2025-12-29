@@ -3,7 +3,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import { parseCookies } from 'nookies';
 import React, { useEffect } from 'react'
 
-function requireAuthCSR(pathname: string, router: any, redirectTo: string = "/login") {
+type SimpleRouter = {
+  replace: (url: string) => void;
+};
+
+function requireAuthCSR(pathname: string, router: SimpleRouter, redirectTo: string = "/login") {
     const cookiesClient = parseCookies();
     const token = cookiesClient["auth_token"];
     

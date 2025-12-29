@@ -9,28 +9,27 @@ const DeliveryDatePicker = ({
   callbackOnChange,
   className = "border rounded-lg p-2 w-auto text-center text-sm",
   selected,
-  ...props
 }: {
   onChange?: (date: Date | null) => void;
   callbackOnChange?: (date: Date | null) => void;
   className?: string;
   selected: Date | null;
 }) => {
-  const datepickerRef = useRef<any>(null);
+  const datepickerRef = useRef<DatePicker | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Set default to today
   useEffect(() => {
     const today = selected || new Date();
     setSelectedDate(today);
-    onChange && onChange(today);
-    callbackOnChange && callbackOnChange(today);
-  }, []);
+    if (onChange) onChange(today);
+    if (callbackOnChange) callbackOnChange(today);
+  }, [selected, onChange, callbackOnChange]);
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
-    onChange && onChange(date);
-    callbackOnChange && callbackOnChange(date);
+    if (onChange) onChange(date);
+    if (callbackOnChange) callbackOnChange(date);
   };
 
   const handleClickDatepickerIcon = () => {

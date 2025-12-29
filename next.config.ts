@@ -7,8 +7,12 @@ const nextConfig: NextConfig = {
   // },
   images: {
     remotePatterns: [
-       {
-        hostname: '192.168.1.118',
+      {
+        hostname: '192.168.1.150',
+        port: '3000',
+      },
+      {
+        hostname: '127.0.0.1',
         port: '3000',
       },
     ],

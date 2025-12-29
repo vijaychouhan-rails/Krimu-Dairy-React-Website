@@ -1,7 +1,13 @@
 import nookies, { destroyCookie, parseCookies, setCookie } from "nookies";
 import { isEmpty } from "lodash";
 
-export const setCookies = ({headers}: any) => {
+type AuthHeaders = {
+  client?: string;
+  name?: string;
+  id?: number | string;
+} & Record<string, unknown>;
+
+export const setCookies = ({ headers }: { headers: AuthHeaders }) => {
   setCookie(null, "auth_token", JSON.stringify(headers), {
     path: "/",
   })
@@ -20,7 +26,7 @@ export const destroyCookies = () => {
 };
 
 // Server side cookies
-export const getSSCookies = (ctx:any) => {
+export const getSSCookies = (ctx: Parameters<typeof nookies.get>[0]) => {
   const cookies = nookies.get(ctx);
   if (!isEmpty(cookies?.auth_token)) {
     return JSON.parse(cookies.auth_token);

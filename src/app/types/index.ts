@@ -1,7 +1,8 @@
 export type Category = {
+    id: number;
     name: string;
-    icon: String;
-    category_image_url?: any;
+    icon: string;
+    category_image_url?: string | null;
 }
 
 export type Product = {
@@ -9,6 +10,7 @@ export type Product = {
   price: number;
   gst_percentage: number | null;
   product_name: string;
+  product_category_name?: string;
   unit: string;
   position: number;
   detail: string;
@@ -36,8 +38,8 @@ export type DashboardData = {
         current_page: number;
         next_page: number;
     },
-    categories: any[];
-    category_products: any[];
+    categories: Category[];
+    category_products: CategoryProduct[];
     top_message: string;
 }
 
