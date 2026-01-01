@@ -7,25 +7,39 @@ interface OrderStatusBadgeProps {
 }
 
 export const OrderStatusBadge = ({ status }: OrderStatusBadgeProps) => {
-  const statusConfig = {
+  const statusConfig: Record<DeliveryStatus, {
+    label: string;
+    variant: "warning" | "success" | "destructive" | "default" | "secondary" | "outline";
+    icon: typeof Clock | typeof CheckCircle2 | typeof XCircle;
+  }> = {
     pending: {
       label: "Pending",
-      variant: "warning" as const,
+      variant: "warning",
       icon: Clock,
     },
     pg_payment_pending: {
       label: "Payment Pending",
-      variant: "ghost" as const,
+      variant: "outline",
       icon: Clock,
+    },
+    confirmed: {
+      label: "Confirmed",
+      variant: "success",
+      icon: CheckCircle2,
     },
     delivered: {
       label: "Delivered",
-      variant: "success" as const,
+      variant: "success",
       icon: CheckCircle2,
+    },
+    declined: {
+      label: "Declined",
+      variant: "destructive",
+      icon: XCircle,
     },
     cancelled: {
       label: "Cancelled",
-      variant: "destructive" as const,
+      variant: "destructive",
       icon: XCircle,
     },
   };

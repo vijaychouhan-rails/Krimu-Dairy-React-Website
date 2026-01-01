@@ -1,18 +1,16 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { Eye, EyeOff, User, Mail, Lock, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, User, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Separator } from "../components/ui/separator";
 import Link from "next/link";
 import { login, register, verifyOtp } from "@/services/auth";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { authWrapper } from "@/lib/authWrapper";
-import { useQueryClient } from "@tanstack/react-query";
 import showErrorMessages from "@/lib/errorHandle";
 import { BiMobile } from "react-icons/bi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
@@ -36,7 +34,6 @@ const LoginRegister = () => {
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [otpValue, setOtpValue] = useState("");
 
-  const route = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
 

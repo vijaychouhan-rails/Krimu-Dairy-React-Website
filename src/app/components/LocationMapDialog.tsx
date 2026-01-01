@@ -30,6 +30,10 @@ type GeocoderAddressResponse = {
   address_components?: GeocoderAddressComponents;
 };
 
+type SearchLocationResponse = {
+  coordinates?: [number | string, number | string] | null;
+};
+
 type LocationMapDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -114,8 +118,8 @@ export function LocationMapDialog({
 
     setSearchLoading(true);
     try {
-      const res = await searchLocation({ address: query });
-      const coords = (res as any)?.coordinates;
+      const res: SearchLocationResponse = await searchLocation({ address: query });
+      const coords = res.coordinates;
 
       if (Array.isArray(coords) && coords.length >= 2) {
         const lat = Number(coords[0]);

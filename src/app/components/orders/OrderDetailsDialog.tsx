@@ -11,9 +11,8 @@ import {
 } from "../../components/ui/dialog";
 import { Button } from "../../components/ui/button";
 import { OrderStatusBadge } from "./OrderStatusBadge";
-import { Calendar, Package, Truck, X } from "lucide-react";
+import { X } from "lucide-react";
 import { format } from "date-fns";
-import { Separator } from "../../components/ui/separator";
 import { toast } from "react-toastify";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import { Textarea } from "../../components/ui/textarea";
@@ -30,6 +29,42 @@ import {
 } from "../../components/ui/alert-dialog";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchOrderDetails, fetchOrderStatuses, cancelOrder } from "@/services/orderService";
+
+type OrderProduct = {
+  id: number;
+  product_name: string;
+  quantity: number;
+  unit?: string | null;
+  price: number;
+  total_amount?: number | null;
+};
+
+type OrderDeliveryAddress =
+  | string
+  | {
+      full_address?: string | null;
+      address?: string | null;
+    };
+
+type OrderDetails = Order & {
+  order_products?: OrderProduct[];
+  delivery_address?: OrderDeliveryAddress | null;
+  sub_total_amount?: number | null;
+  total_amount?: number | null;
+  delivery_charge?: number | null;
+  promo_discount?: number | null;
+  total_payable_amount?: number | null;
+  final_amount_to_pay?: number | null;
+  paid_amount?: number | null;
+  payment_mode?: string | null;
+};
+
+type OrderStatusItem = {
+  status?: string | null;
+  message?: string | null;
+  created_at?: string | null;
+  active?: boolean | null;
+};
 interface OrderDetailsDialogProps {
   order: Order | null;
   open: boolean;
@@ -43,17 +78,18 @@ export const OrderDetailsDialog = ({
   onOpenChange,
   onCancelOrder,
 }: OrderDetailsDialogProps) => {
-  if (!order) return null;
   const [cancelMessage, setCancelMessage] = useState("");
+
+  const orderId = order?.id;
 
   const {
     data: orderDetails,
     isLoading: isDetailsLoading,
     isError: isDetailsError,
   } = useQuery({
-    queryKey: ["ORDER_DETAILS", order.id],
-    queryFn: () => fetchOrderDetails(order.id),
-    enabled: !!order.id,
+    queryKey: ["ORDER_DETAILS", orderId],
+    queryFn: () => (orderId ? fetchOrderDetails(orderId) : Promise.resolve(null)),
+    enabled: !!orderId,
   });
 
   const {
@@ -61,27 +97,31 @@ export const OrderDetailsDialog = ({
     isLoading: isStatusesLoading,
     isError: isStatusesError,
   } = useQuery({
-    queryKey: ["ORDER_STATUSES", order.id],
-    queryFn: () => fetchOrderStatuses(order.id),
-    enabled: !!order.id,
+    queryKey: ["ORDER_STATUSES", orderId],
+    queryFn: () => (orderId ? fetchOrderStatuses(orderId) : Promise.resolve(null)),
+    enabled: !!orderId,
   });
 
-  const details: any =
-    (orderDetails as any)?.estore_one_time_order || orderDetails || order;
+  const details: OrderDetails | null =
+    (orderDetails &&
+      (orderDetails as { estore_one_time_order?: OrderDetails }).estore_one_time_order) ||
+    (orderDetails as OrderDetails | null) ||
+    (order as OrderDetails | null);
 
-  const statuses: any[] =
-    ((orderStatuses as any)?.order_statuses as any[]) ||
-    ((Array.isArray(orderStatuses) ? orderStatuses : []) as any[]);
+  const statuses: OrderStatusItem[] =
+    (orderStatuses &&
+      (orderStatuses as { order_statuses?: OrderStatusItem[] }).order_statuses) ||
+    (Array.isArray(orderStatuses) ? (orderStatuses as OrderStatusItem[]) : []);
 
   const cancelMutation = useMutation({
     mutationFn: ({ message }: { message: string }) =>
-      cancelOrder({ id: order.id, message }),
+      cancelOrder({ id: order!.id, message }),
     onSuccess: () => {
       if (onCancelOrder) {
-        onCancelOrder(order.id);
+        onCancelOrder(order!.id);
       }
       toast.success(
-        `Order #${order.order_no} has been cancelled successfully.`
+        `Order #${order!.order_no} has been cancelled successfully.`
       );
       setCancelMessage("");
       onOpenChange(false);
@@ -90,6 +130,10 @@ export const OrderDetailsDialog = ({
       toast.error("Failed to cancel order. Please try again.");
     },
   });
+
+  if (!order) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,9 +201,11 @@ export const OrderDetailsDialog = ({
                     </div>
                     {details.delivery_address ? (
                       <p className="text-sm break-words">
-                        {(details.delivery_address as any).full_address ??
-                          (details.delivery_address as any).address ??
-                          String(details.delivery_address)}
+                        {typeof details.delivery_address === "string"
+                          ? details.delivery_address
+                          : details.delivery_address.full_address ??
+                            details.delivery_address.address ??
+                            ""}
                       </p>
                     ) : (
                       <p className="text-muted-foreground">No delivery address available.</p>
@@ -175,7 +221,7 @@ export const OrderDetailsDialog = ({
                     </div>
                     {details.order_products && details.order_products.length > 0 ? (
                       <div className="space-y-2 max-h-48 overflow-auto">
-                        {details.order_products.map((p: any) => (
+                        {details.order_products.map((p: OrderProduct) => (
                           <div
                             key={p.id}
                             className="flex justify-between items-start gap-3 border-b last:border-b-0 pb-1"
@@ -227,7 +273,7 @@ export const OrderDetailsDialog = ({
               )}
               {!isStatusesLoading && !isStatusesError && statuses.length > 0 && (
                 <div className="space-y-2 text-sm">
-                  {statuses.map((status: any, index: number) => {
+                  {statuses.map((status: OrderStatusItem, index: number) => {
                     const isActive = !!status.active;
                     const cardClasses = isActive
                       ? "border-green-200 bg-green-50"

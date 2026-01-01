@@ -1,16 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Order, DeliveryStatus } from "../../types";
 import { OrderCard } from "../../components/orders/OrderCard";
 import { OrderDetailsDialog } from "../../components/orders/OrderDetailsDialog";
 import { OrderFilters } from "../../components/orders/OrderFilters";
 import { ShoppingBag } from "lucide-react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchOrders } from "@/services/orderService";
 import showErrorMessages from "@/lib/errorHandle";
 import { useRouter } from "next/navigation";
 import InfiniteScroll from "react-infinite-scroll-component";
-import dynamic from "next/dynamic";
 
 
 const defaultValue: { status: "all" | DeliveryStatus } = {
@@ -19,7 +18,7 @@ const defaultValue: { status: "all" | DeliveryStatus } = {
 
 const MyOrders = () => {
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState(defaultValue);

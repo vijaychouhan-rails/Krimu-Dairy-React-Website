@@ -9,7 +9,7 @@ import { Badge } from "../components/ui/badge";
 import { Checkbox } from "../components/ui/checkbox";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchCategoryProducts, fetchProductCategories } from "@/services/productService";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -36,11 +36,12 @@ const Categories = () => {
     queryKey: ["PRODUCT_CATEGORIES"],
     queryFn: fetchProductCategories,
   });
-
-  const baseCategories = categoriesData ?? [];
-  const categories = baseCategories.length
-    ? [...baseCategories, { id: null, name: "Others" }]
-    : [];
+  const categories = useMemo(() => {
+    const baseCategories = categoriesData ?? [];
+    return baseCategories.length
+      ? [...baseCategories, { id: null, name: "Others" }]
+      : [];
+  }, [categoriesData]);
 
   useEffect(() => {
     if (!categories.length || hasSetDefaultCategory) return;

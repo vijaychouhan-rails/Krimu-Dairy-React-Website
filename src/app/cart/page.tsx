@@ -113,12 +113,12 @@ const Cart = () => {
     dispatch(removeItem(id));
   };
 
-  //Fetch user's saved addresses
-  const { data: addresses } = useQuery({
+  //Fetch user's saved addresses (data currently unused but kept for side effects/caching)
+  useQuery({
     queryKey: [GET_DELIVERY_ADD.name],
     queryFn: () => fetchDeliveryAddresses(userId),
     retry: false,
-    enabled: !!userId
+    enabled: !!userId,
   });
 
   const handlePlaceOrder = useMutation({

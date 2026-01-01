@@ -5,11 +5,13 @@ export async function getDashboardData(params: { page: number; latitude?: string
   return response.data;
 }
 
-export async function fetchCategoryProducts({ id, latitude, longitude, page }: {id?: number | undefined | null, latitude:string, longitude:string, page?: number }) {
-  const response = await axios.get(`/api/v2/bc/estore/estore_product_categories/${id}/estore_category_products`, 
+export async function fetchCategoryProducts(params: { id?: number | null; latitude: string; longitude: string; page?: number }) {
+  const { id, page } = params;
+  const response = await axios.get(
+    `/api/v2/bc/estore/estore_product_categories/${id}/estore_category_products`,
     {
-      params: { page: page },
-    }
+      params: { page },
+    },
   );
 
   return response.data;

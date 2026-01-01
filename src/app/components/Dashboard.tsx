@@ -46,8 +46,6 @@ function Dashboard() {
     data,
     fetchNextPage,
     hasNextPage,
-    isLoading,
-    isError,
     error
   } = useInfiniteQuery({
     queryKey: [GET_ESTORE_DASHBOARD_DATA.name, latitude, longitude],
