@@ -10,6 +10,7 @@ interface LocationState {
   country: string;
   house_number: string;
   street: string;
+  landmark: string;
 }
 
 const initialState: LocationState = {
@@ -22,6 +23,7 @@ const initialState: LocationState = {
   country: "",
   house_number: "",
   street: "",
+  landmark: "",
 };
 
 const locationSlice = createSlice({
@@ -45,6 +47,7 @@ const locationSlice = createSlice({
         country?: string;
         house_number?: string;
         street?: string;
+        landmark?: string;
       }>
     ) => {
       if (action.payload.location !== undefined) state.location = action.payload.location;
@@ -54,6 +57,7 @@ const locationSlice = createSlice({
       if (action.payload.country !== undefined) state.country = action.payload.country;
       if (action.payload.house_number !== undefined) state.house_number = action.payload.house_number;
       if (action.payload.street !== undefined) state.street = action.payload.street;
+      if (action.payload.landmark !== undefined) state.landmark = action.payload.landmark;
     },
   },
 });

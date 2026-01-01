@@ -28,11 +28,17 @@ export const OrderFilters = ({ activeFilter, handlestatus }: OrderFiltersProps) 
             {counts.pending}
           </span> */}
         </TabsTrigger>
+        <TabsTrigger value="confirmed" className="gap-2">
+          Confirmed
+        </TabsTrigger>
         <TabsTrigger value="delivered" className="gap-2">
           Delivered
           {/* <span className="bg-success/10 text-success px-2 py-0.5 rounded-full text-xs font-semibold">
             {counts.delivered}
           </span> */}
+        </TabsTrigger>
+        <TabsTrigger value="declined" className="gap-2">
+          Declined
         </TabsTrigger>
         <TabsTrigger value="cancelled" className="gap-2">
           Cancelled

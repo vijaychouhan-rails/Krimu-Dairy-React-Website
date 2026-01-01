@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Filter, Grid, List } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
+import { Skeleton } from "../components/ui/skeleton";
 import { Badge } from "../components/ui/badge";
 import { Checkbox } from "../components/ui/checkbox";
 import Link from "next/link";
@@ -85,8 +86,69 @@ const Categories = () => {
 
   if (isLoading)
     return (
-      <div className="text-center py-16 text-muted-foreground text-lg">
-        Loading products...
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <aside className="lg:w-64 space-y-6">
+              <div className="bg-card p-6 rounded-2xl shadow-sm border">
+                <h3 className="font-semibold mb-4 flex items-center">
+                  <Filter className="h-4 w-4 mr-2 text-primary" />
+                  Filters
+                </h3>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-24" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center space-x-2"
+                      >
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <main className="flex-1">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                  <Skeleton className="h-6 w-40 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                </div>
+              </div>
+
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <Card
+                    key={idx}
+                    className="rounded-2xl border overflow-hidden"
+                  >
+                    <CardContent className="p-0">
+                      <Skeleton className="h-48 w-full" />
+                      <div className="p-4 space-y-3">
+                        <Skeleton className="h-5 w-24" />
+                        <Skeleton className="h-5 w-40" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                        <div className="flex items-center justify-between pt-2">
+                          <Skeleton className="h-6 w-16" />
+                          <Skeleton className="h-8 w-20 rounded-full" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </main>
+          </div>
+        </div>
       </div>
     );
 

@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { clearCart, removeItem, updateQuantity, type CartItem } from "@/store/cartSlice";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { fetchDeliveryAddresses, placeOrder } from "@/services/orderService";
+import { fetchCartPaymentInformation, fetchDeliveryAddresses, placeOrder } from "@/services/orderService";
 import showErrorMessages from "@/lib/errorHandle";
 import { GET_DELIVERY_ADD } from "@/constants/queryName";
 import { fetchAuth } from "@/lib/appCookies";
@@ -20,6 +20,7 @@ import DatePickerField from "../components/field";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { LocationMapDialog } from "../components/LocationMapDialog";
+import { EditAddressLabelDialog, type EditAddressData } from "../components/EditAddressLabelDialog";
 import { setLocation, setLocationAddress } from "@/store/locationSlice";
 
 type GeocoderAddressComponents = {
@@ -29,6 +30,7 @@ type GeocoderAddressComponents = {
   country?: string;
   house_number?: string;
   street?: string;
+  landmark?: string;
 };
 
 type GeocoderAddressResponse = {
@@ -36,6 +38,24 @@ type GeocoderAddressResponse = {
   error?: boolean;
   location: string;
   address_components?: GeocoderAddressComponents;
+};
+
+type CartPaymentInfo = {
+  product_data: unknown;
+  total_amount: number;
+  total_payable_amount: number;
+  gst_amount: number;
+  discount_value: number;
+  debit_from_wallet: number;
+  coupon_message?: string;
+  errors: string[];
+};
+
+type CartPaymentInformationResponse = {
+  success: boolean;
+  checkout_products: unknown[];
+  payment_modes: unknown[];
+  payment_info: CartPaymentInfo;
 };
 
 type PlaceOrderResponse = {
@@ -48,10 +68,13 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [deliveryDate, setDeliveryDate] = useState<Date>(new Date());
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
-  const [paymentMode, setPaymentMode] = useState<"COD" | "ONLINE">("COD");
+  const [paymentMode, setPaymentMode] = useState<"COD">("COD");
   const [couponCode, setCouponCode] = useState("");
+  const [couponPaymentInfo, setCouponPaymentInfo] = useState<CartPaymentInfo | null>(null);
   const [saveAddress, setSaveAddress] = useState(false);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [editAddressDialogOpen, setEditAddressDialogOpen] = useState(false);
+  const [pendingEditAddress, setPendingEditAddress] = useState<EditAddressData | null>(null);
 
   const dispatch = useDispatch();
   
@@ -67,9 +90,16 @@ const Cart = () => {
     country,
     house_number,
     street,
+    landmark,
   } = locationState;
   const authData = fetchAuth();
   const userId = authData.user_id;
+
+  const productsForPaymentInfo = cartItems.map((item: CartItem) => ({
+    id: item.id,
+    quantity: item.quantity,
+    product_name: item.name,
+  }));
 
   const handleUpdateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -113,7 +143,7 @@ const Cart = () => {
         country_name: country,
         state,
         street,
-        landmark: "",
+        landmark: landmark || "",
         is_saved: saveAddress,
       };
 
@@ -138,11 +168,94 @@ const Cart = () => {
       showErrorMessages({ error: error.message ?? "Something went wrong" })
     },
   })
-
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 50 ? 0 : 5.99;
   const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const total = subtotal  + tax;
+
+  const { data: cartPaymentData } = useQuery<CartPaymentInformationResponse>({
+    queryKey: [
+      "cart_payment_information",
+      productsForPaymentInfo,
+      latitude,
+      longitude,
+    ],
+    queryFn: () =>
+      fetchCartPaymentInformation({
+        products: productsForPaymentInfo,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        couponCode: null,
+      }),
+    enabled:
+      cartItems.length > 0 && !!latitude && !!longitude,
+    retry: false,
+  });
+
+  const effectivePaymentInfo = couponPaymentInfo ?? cartPaymentData?.payment_info;
+  const backendPaymentInfo = effectivePaymentInfo;
+  const displaySubtotal = backendPaymentInfo
+    ? backendPaymentInfo.total_amount - backendPaymentInfo.gst_amount
+    : subtotal;
+  const displayGst = backendPaymentInfo?.gst_amount ?? tax;
+  const displayTotal = backendPaymentInfo?.total_payable_amount ?? total;
+  const displayOriginalTotal = backendPaymentInfo?.total_amount ?? total;
+  const displayDiscount = backendPaymentInfo
+    ? backendPaymentInfo.total_amount - backendPaymentInfo.total_payable_amount
+    : 0;
+
+  const applyCoupon = useMutation({
+    mutationFn: () => {
+      if (!latitude || !longitude) {
+        toast.error("Please select delivery location");
+        throw new Error("Location not selected");
+      }
+
+      return fetchCartPaymentInformation({
+        products: productsForPaymentInfo,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        couponCode: couponCode || null,
+      });
+    },
+    onSuccess: (data: CartPaymentInformationResponse) => {
+      const info = data.payment_info;
+
+      if (info?.errors && info.errors.length > 0) {
+        toast.error(info.errors[0]);
+        setCouponPaymentInfo(null);
+        return;
+      }
+
+      setCouponPaymentInfo(info);
+    },
+    onError: (error: { message?: string }) => {
+      showErrorMessages({ error: error.message ?? "Something went wrong" });
+    },
+  });
+
+  const removeCoupon = useMutation({
+    mutationFn: () => {
+      if (!latitude || !longitude) {
+        toast.error("Please select delivery location");
+        throw new Error("Location not selected");
+      }
+
+      return fetchCartPaymentInformation({
+        products: productsForPaymentInfo,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        couponCode: null,
+      });
+    },
+    onSuccess: () => {
+      setCouponPaymentInfo(null);
+      setCouponCode("");
+    },
+    onError: (error: { message?: string }) => {
+      showErrorMessages({ error: error.message ?? "Something went wrong" });
+    },
+  });
 
   useEffect(() => {
     setCartItems(items)
@@ -327,7 +440,7 @@ const Cart = () => {
                   {/* Payment mode */}
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Payment Mode</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2">
                       <Button
                         type="button"
                         variant={paymentMode === "COD" ? "default" : "outline"}
@@ -335,14 +448,6 @@ const Cart = () => {
                         onClick={() => setPaymentMode("COD")}
                       >
                         COD
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={paymentMode === "ONLINE" ? "default" : "outline"}
-                        className="w-full"
-                        onClick={() => setPaymentMode("ONLINE")}
-                      >
-                        Online
                       </Button>
                     </div>
                   </div>
@@ -355,15 +460,21 @@ const Cart = () => {
                         type="text"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
+                        disabled={!!couponPaymentInfo}
                         placeholder="Enter coupon"
                         className="flex-1 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       />
                       <Button
                         type="button"
                         variant="outline"
-                        disabled={!couponCode}
+                        disabled={!couponPaymentInfo && !couponCode}
+                        onClick={() =>
+                          couponPaymentInfo
+                            ? removeCoupon.mutate()
+                            : applyCoupon.mutate()
+                        }
                       >
-                        Apply
+                        {couponPaymentInfo ? "Remove" : "Apply"}
                       </Button>
                     </div>
                   </div>
@@ -373,20 +484,31 @@ const Cart = () => {
                     <Separator />
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>₹ {subtotal.toFixed(2)}</span>
+                      <span>₹ {displaySubtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Shipping</span>
-                      <span>{shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}</span>
+                      <span>GST</span>
+                      <span>₹ {displayGst.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Tax</span>
-                      <span>₹ {tax.toFixed(2)}</span>
-                    </div>
+                    {couponPaymentInfo && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Discount</span>
+                        <span>- ₹ {displayDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>
-                      <span>₹ {total.toFixed(2)}</span>
+                      {couponPaymentInfo ? (
+                        <span className="space-x-2">
+                          <span className="line-through text-sm text-muted-foreground">
+                            ₹ {displayOriginalTotal.toFixed(2)}
+                          </span>
+                          <span>₹ {displayTotal.toFixed(2)}</span>
+                        </span>
+                      ) : (
+                        <span>₹ {displayTotal.toFixed(2)}</span>
+                      )}
                     </div>
                   </div>
 
@@ -429,27 +551,59 @@ const Cart = () => {
           longitude: string;
           addressResponse: GeocoderAddressResponse | null;
         }) => {
+          const components = addressResponse?.address_components || {};
+
+          const next: EditAddressData = {
+            latitude: selectedLat,
+            longitude: selectedLng,
+            location: addressResponse?.location || location || "",
+            city: components.city ?? city,
+            state: components.state ?? state,
+            postal_code: components.postal_code ?? postal_code,
+            country: components.country ?? country,
+            house_number: components.house_number ?? house_number,
+            street: components.street ?? street,
+            landmark: components.landmark ?? landmark,
+          };
+
+          setPendingEditAddress(next);
+          setEditAddressDialogOpen(true);
+        }}
+      />
+
+      <EditAddressLabelDialog
+        open={editAddressDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditAddressDialogOpen(false);
+            setLocationDialogOpen(true);
+          } else {
+            setEditAddressDialogOpen(true);
+          }
+        }}
+        initialAddress={pendingEditAddress}
+        onSave={(data: EditAddressData) => {
           dispatch(
             setLocation({
-              latitude: selectedLat,
-              longitude: selectedLng,
+              latitude: data.latitude,
+              longitude: data.longitude,
             })
           );
 
-          if (addressResponse && addressResponse.success && !addressResponse.error) {
-            const components = addressResponse.address_components || {};
-            dispatch(
-              setLocationAddress({
-                location: addressResponse.location,
-                city: components.city,
-                state: components.state,
-                postal_code: components.postal_code,
-                country: components.country,
-                house_number: components.house_number,
-                street: components.street,
-              })
-            );
-          }
+          dispatch(
+            setLocationAddress({
+              location: data.location,
+              city: data.city,
+              state: data.state,
+              postal_code: data.postal_code,
+              country: data.country,
+              house_number: data.house_number,
+              street: data.street,
+              landmark: data.landmark,
+            })
+          );
+
+          setEditAddressDialogOpen(false);
         }}
       />
     </div>

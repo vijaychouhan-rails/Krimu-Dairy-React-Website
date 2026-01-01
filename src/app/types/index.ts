@@ -45,7 +45,7 @@ export type DashboardData = {
 
 // Dashboard now reads latitude/longitude from Redux store instead of props
 
-export type DeliveryStatus = "pending" | "delivered" | "cancelled";
+export type DeliveryStatus = "pending" | "pg_payment_pending" | "confirmed" | "delivered" | "declined" | "cancelled";
 
 export interface Order {
   id: number;

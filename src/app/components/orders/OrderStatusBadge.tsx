@@ -14,8 +14,8 @@ export const OrderStatusBadge = ({ status }: OrderStatusBadgeProps) => {
       icon: Clock,
     },
     pg_payment_pending: {
-      label: "Pending",
-      variant: "warning" as const,
+      label: "Payment Pending",
+      variant: "ghost" as const,
       icon: Clock,
     },
     delivered: {

@@ -12,60 +12,6 @@ import { useRouter } from "next/navigation";
 import InfiniteScroll from "react-infinite-scroll-component";
 import dynamic from "next/dynamic";
 
-// Sample data from your API
-const mockData = {
-  estore_onetime_orders: [
-    {
-      id: 93,
-      order_no: "20257423",
-      delivery_date: "2025-10-10",
-      delivery_status: "pending" as const,
-      estimated_delivery_time: null,
-      can_cancel_order: true,
-      total_items: 1,
-    },
-    {
-      id: 92,
-      order_no: "20250524",
-      delivery_date: "2025-10-10",
-      delivery_status: "pending" as const,
-      estimated_delivery_time: null,
-      can_cancel_order: true,
-      total_items: 1,
-    },
-    {
-      id: 91,
-      order_no: "20256530",
-      delivery_date: "2025-10-10",
-      delivery_status: "pending" as const,
-      estimated_delivery_time: null,
-      can_cancel_order: true,
-      total_items: 1,
-    },
-    {
-      id: 94,
-      order_no: "20255655",
-      delivery_date: "2025-10-04",
-      delivery_status: "pending" as const,
-      estimated_delivery_time: null,
-      can_cancel_order: true,
-      total_items: 1,
-    },
-    {
-      id: 88,
-      order_no: "20256857",
-      delivery_date: "2025-10-02",
-      delivery_status: "cancelled" as const,
-      estimated_delivery_time: null,
-      can_cancel_order: false,
-      total_items: 1,
-    },
-  ],
-  meta: {
-    current_page: 1,
-    next_page: 2,
-  },
-};
 
 const defaultValue: { status: "all" | DeliveryStatus } = {
   status: "all",
@@ -73,7 +19,7 @@ const defaultValue: { status: "all" | DeliveryStatus } = {
 
 const MyOrders = () => {
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>(mockData.estore_onetime_orders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState(defaultValue);
@@ -169,7 +115,7 @@ const MyOrders = () => {
               <p className="text-muted-foreground">
                 {activeFilter.status === "all"
                   ? "You haven't placed any orders yet."
-                  : `You have no ${activeFilter} orders.`}
+                  : `You have no ${activeFilter.status} orders.`}
               </p>
             </div>
           ) : (
@@ -179,11 +125,6 @@ const MyOrders = () => {
                     next={fetchNextPage}
                     hasMore={!!hasNextPage}
                     loader={<h4 className="text-center">Loading more products...</h4>}
-                    endMessage={
-                        <p className="text-center mt-4">
-                        <b>All Orders loaded!</b>
-                        </p>
-                    }
                 >
                     {filteredOrders.map((order) => (
                         <OrderCard

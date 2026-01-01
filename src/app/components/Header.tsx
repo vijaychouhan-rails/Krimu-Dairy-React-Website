@@ -18,12 +18,13 @@ import { clearCart } from "@/store/cartSlice";
 import { setLocation, setLocationAddress } from "@/store/locationSlice";
 import { getAddressFromCoordinates } from "@/services/geocoderService";
 import { LocationMapDialog } from "./LocationMapDialog";
+import { EditAddressLabelDialog, type EditAddressData } from "./EditAddressLabelDialog";
 import logo from "../../assets/logo.png";
 import { usePathname } from "next/navigation";
 
 const HeaderContent: React.FC = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
-  const { latitude, longitude, location } = useSelector(
+  const { latitude, longitude, location, city, state, postal_code, country, house_number, street, landmark } = useSelector(
     (state: RootState) => state.location
   );
   const pathname = usePathname();
@@ -31,6 +32,8 @@ const HeaderContent: React.FC = () => {
   const cartCount = cartItems.length;
   const [serviceAvailable, setServiceAvailable] = useState<boolean | null>(null);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [editAddressDialogOpen, setEditAddressDialogOpen] = useState(false);
+  const [pendingEditAddress, setPendingEditAddress] = useState<EditAddressData | null>(null);
 
   const authData = fetchAuth();
   const isLoggedIn = authData.isLoggedIn;
@@ -49,7 +52,57 @@ const HeaderContent: React.FC = () => {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!navigator.geolocation) return;
+
+    try {
+      const stored = window.localStorage.getItem("krimu:lastLocation");
+      if (stored) {
+        const parsed = JSON.parse(stored) as {
+          latitude?: string;
+          longitude?: string;
+          location?: string;
+          address_components?: {
+            city?: string;
+            state?: string;
+            postal_code?: string;
+            country?: string;
+            house_number?: string;
+            street?: string;
+          } | null;
+        };
+
+        if (parsed.latitude && parsed.longitude) {
+          dispatch(
+            setLocation({
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+            })
+          );
+
+          if (parsed.location || parsed.address_components) {
+            const components = parsed.address_components || {};
+            dispatch(
+              setLocationAddress({
+                location: parsed.location || "",
+                city: components.city,
+                state: components.state,
+                postal_code: components.postal_code,
+                country: components.country,
+                house_number: components.house_number,
+                street: components.street,
+              })
+            );
+          }
+
+          return;
+        }
+      }
+    } catch {
+    }
+
+    if (!navigator.geolocation) {
+      setLocationDialogOpen(true);
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -62,18 +115,23 @@ const HeaderContent: React.FC = () => {
         );
       },
       () => {
-        dispatch(
-          setLocation({
-            latitude: "22.6883834",
-            longitude: "75.8284917",
-          })
-        );
+        setLocationDialogOpen(true);
       }
     );
   }, [dispatch]);
 
   const handleChangeLocation = () => {
     setLocationDialogOpen(true);
+  };
+
+  const handleLocationDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      if (!latitude || !longitude || !location) {
+        return;
+      }
+    }
+
+    setLocationDialogOpen(open);
   };
 
   type GeocoderAddressComponents = {
@@ -83,6 +141,7 @@ const HeaderContent: React.FC = () => {
     country?: string;
     house_number?: string;
     street?: string;
+    landmark?: string;
   };
 
   type GeocoderAddressResponse = {
@@ -101,31 +160,61 @@ const HeaderContent: React.FC = () => {
     longitude: string;
     addressResponse: GeocoderAddressResponse | null;
   }) => {
+    const components = addressResponse?.address_components || {};
+
+    const next: EditAddressData = {
+      latitude: selectedLat,
+      longitude: selectedLng,
+      location: addressResponse?.location || location || "",
+      city: components.city ?? city,
+      state: components.state ?? state,
+      postal_code: components.postal_code ?? postal_code,
+      country: components.country ?? country,
+      house_number: components.house_number ?? house_number,
+      street: components.street ?? street,
+      landmark: components.landmark ?? landmark,
+    };
+
+    setPendingEditAddress(next);
+    setEditAddressDialogOpen(true);
+  };
+
+  const handleEditAddressSave = (data: EditAddressData) => {
     dispatch(
       setLocation({
-        latitude: selectedLat,
-        longitude: selectedLng,
+        latitude: data.latitude,
+        longitude: data.longitude,
       })
     );
 
-    if (addressResponse && addressResponse.success && !addressResponse.error) {
-      const components = addressResponse.address_components || {};
-      dispatch(
-        setLocationAddress({
-          location: addressResponse.location,
-          city: components.city,
-          state: components.state,
-          postal_code: components.postal_code,
-          country: components.country,
-          house_number: components.house_number,
-          street: components.street,
-        })
-      );
+    dispatch(
+      setLocationAddress({
+        location: data.location,
+        city: data.city,
+        state: data.state,
+        postal_code: data.postal_code,
+        country: data.country,
+        house_number: data.house_number,
+        street: data.street,
+        landmark: data.landmark,
+      })
+    );
+
+    setEditAddressDialogOpen(false);
+  };
+
+  const handleEditAddressDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setEditAddressDialogOpen(false);
+      setLocationDialogOpen(true);
+      return;
     }
+
+    setEditAddressDialogOpen(true);
   };
 
   useEffect(() => {
-    if (!latitude || !longitude) return;
+    if (!latitude || !longitude || location) return;
 
     getAddressFromCoordinates({ latitude, longitude })
       .then((res: GeocoderAddressResponse) => {
@@ -146,7 +235,7 @@ const HeaderContent: React.FC = () => {
       })
       .catch(() => {
       });
-  }, [latitude, longitude, dispatch]);
+  }, [latitude, longitude, location, dispatch]);
 
   useEffect(() => {
     if (!latitude || !longitude) return;
@@ -280,10 +369,17 @@ const HeaderContent: React.FC = () => {
   {/* Map Dialog */}
   <LocationMapDialog
     open={locationDialogOpen}
-    onOpenChange={setLocationDialogOpen}
+    onOpenChange={handleLocationDialogOpenChange}
     initialLatitude={latitude}
     initialLongitude={longitude}
     onLocationSelected={handleMapLocationSelected}
+  />
+
+  <EditAddressLabelDialog
+    open={editAddressDialogOpen}
+    onOpenChange={handleEditAddressDialogOpenChange}
+    initialAddress={pendingEditAddress}
+    onSave={handleEditAddressSave}
   />
 </header>
 
