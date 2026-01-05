@@ -20,12 +20,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { addItem } from "@/store/cartSlice";
+import { addItem, removeItem, updateQuantity } from "@/store/cartSlice";
 import { fetchProductById } from "@/services/productService";
 import type { Product } from "../types";
 
 const ProductDetail = () => {
-  const { id } = useParams<{id: string}>();
+  const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -96,8 +96,8 @@ const ProductDetail = () => {
         category: product.product_category_name ?? "",
       })
     );
-    
-    router.push("/cart")
+
+
   };
 
   return (
@@ -143,11 +143,10 @@ const ProductDetail = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index
-                      ? "border-primary"
-                      : "border-transparent"
-                  }`}
+                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 ${selectedImage === index
+                    ? "border-primary"
+                    : "border-transparent"
+                    }`}
                 >
                   <Image
                     src={image}
@@ -182,133 +181,163 @@ const ProductDetail = () => {
               </Badge>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="flex items-center space-x-4">
-              <span className="font-medium">Quantity:</span>
-              <div className="flex items-center border rounded-lg">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1 || isAlreadyInCart}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="px-4 py-2 min-w-[3rem] text-center">
-                  {quantity}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={isAlreadyInCart}
-                  onClick={() => setQuantity(quantity + 1)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            {/* Quantity Selector handled within the Add to Cart logic below if in cart, otherwise local */}
 
-            {/* Add to Cart */}
+            {/* Add to Cart / Quantity Controls */}
             <div className="space-y-3">
-              { isAlreadyInCart ? 
-                <Button
-                  size="lg"
-                  className="w-full bg-[#F7A200] hover:bg-[#e69500] text-white"
-                  disabled={!product.in_stock}
-                  onClick={() => router.push("/cart")}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  GO TO CART
-                </Button>
-              : <Button
-                  size="lg"
-                  className="w-full"
-                  disabled={!product.in_stock}
-                  onClick={handleAddToCart}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart - ₹ {(product.price * quantity).toFixed(2)}
-                </Button>
-              }
-              {/* <Button variant="outline" size="lg" className="w-full">
+              {isAlreadyInCart ? (
+                <div className="flex items-center space-x-4">
+                  <span className="font-medium">Quantity:</span>
+                  <div className="flex items-center border rounded-lg">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const item = cartItems.find((p) => p.id === product.id);
+                        if (item) {
+                          if (item.quantity > 0.5) {
+                            dispatch(updateQuantity({ id: product.id, quantity: item.quantity - 0.5 }));
+                          } else {
+                            dispatch(removeItem(product.id));
+                          }
+                        }
+                      }}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="px-4 py-2 min-w-[3rem] text-center">
+                      {cartItems.find((p) => p.id === product.id)?.quantity ?? 0}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const item = cartItems.find((p) => p.id === product.id);
+                        if (item) {
+                          dispatch(updateQuantity({ id: product.id, quantity: item.quantity + 0.5 }));
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center space-x-4">
+                    <span className="font-medium">Quantity:</span>
+                    <div className="flex items-center border rounded-lg">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setQuantity(Math.max(1, quantity - 0.5))}
+                        disabled={quantity <= 0.5}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="px-4 py-2 min-w-[3rem] text-center">
+                        {quantity}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setQuantity(quantity + 0.5)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    disabled={!product.in_stock}
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Add to Cart - ₹ {(product.price * quantity).toFixed(2)}
+                  </Button>
+                </>
+              )}
+            </div>
+            {/* <Button variant="outline" size="lg" className="w-full">
                 Buy Now
               </Button> */}
-            </div>
+          </div>
 
-            {/* Features */}
-            <div className="grid grid-cols-3 gap-4 py-6">
-              <div className="text-center">
-                <Truck className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-sm font-medium">Free Delivery</div>
-                <div className="text-xs text-muted-foreground">
-                  On orders $50+
-                </div>
-              </div>
-              <div className="text-center">
-                <Shield className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-sm font-medium">Quality Guarantee</div>
-                <div className="text-xs text-muted-foreground">100% fresh</div>
-              </div>
-              <div className="text-center">
-                <RefreshCw className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-sm font-medium">Easy Returns</div>
-                <div className="text-xs text-muted-foreground">
-                  30-day policy
-                </div>
+          {/* Features */}
+          <div className="grid grid-cols-3 gap-4 py-6">
+            <div className="text-center">
+              <Truck className="h-6 w-6 mx-auto mb-2 text-primary" />
+              <div className="text-sm font-medium">Free Delivery</div>
+              <div className="text-xs text-muted-foreground">
+                On orders $50+
               </div>
             </div>
+            <div className="text-center">
+              <Shield className="h-6 w-6 mx-auto mb-2 text-primary" />
+              <div className="text-sm font-medium">Quality Guarantee</div>
+              <div className="text-xs text-muted-foreground">100% fresh</div>
+            </div>
+            <div className="text-center">
+              <RefreshCw className="h-6 w-6 mx-auto mb-2 text-primary" />
+              <div className="text-sm font-medium">Easy Returns</div>
+              <div className="text-xs text-muted-foreground">
+                30-day policy
+              </div>
+            </div>
+          </div>
 
-            {/* Product Details */}
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-3">Product Details</h3>
-                <div className="space-y-2 text-sm">
+          {/* Product Details */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3">Product Details</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">UNIT:</span>
+                  <span>{product.unit}</span>
+                </div>
+                {product.gst_percentage && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">UNIT:</span>
-                    <span>{product.unit}</span>
+                    <span className="text-muted-foreground">GST(%):</span>
+                    <span>{product.gst_percentage}%</span>
                   </div>
-                  {product.gst_percentage && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">GST(%):</span>
-                      <span>{product.gst_percentage}%</span>
-                    </div>
-                  )}
-                  {/* Add Dairy Name */}
-                  {/* <div className="flex justify-between">
+                )}
+                {/* Add Dairy Name */}
+                {/* <div className="flex justify-between">
                     <span className="text-muted-foreground">Brand:</span>
                     <span>{product.brand}</span>
                   </div> */}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Category:</span>
-                    <span>{product.product_category_name || ""}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Category:</span>
+                  <span>{product.product_category_name || ""}</span>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Product Tabs */}
+      <div className="mt-16">
+        <Tabs defaultValue="description" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            {/* <TabsTrigger value="description">Description</TabsTrigger> */}
+            {/* <TabsTrigger value="specifications">Specifications</TabsTrigger> */}
+            {/* <TabsTrigger value="nutrition">Nutrition Facts</TabsTrigger> */}
+          </TabsList>
+
+          <TabsContent value="description" className="mt-6">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-4">Product Description</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {product.detail}
+                </p>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
 
-        {/* Product Tabs */}
-        <div className="mt-16">
-          <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              {/* <TabsTrigger value="description">Description</TabsTrigger> */}
-              {/* <TabsTrigger value="specifications">Specifications</TabsTrigger> */}
-              {/* <TabsTrigger value="nutrition">Nutrition Facts</TabsTrigger> */}
-            </TabsList>
-
-            <TabsContent value="description" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-4">Product Description</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {product.detail}
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* <TabsContent value="specifications" className="mt-6">
+          {/* <TabsContent value="specifications" className="mt-6">
               <Card>
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-4">Specifications</h3>
@@ -324,7 +353,7 @@ const ProductDetail = () => {
               </Card>
             </TabsContent> */}
 
-            {/* <TabsContent value="nutrition" className="mt-6">
+          {/* <TabsContent value="nutrition" className="mt-6">
               <Card>
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-4">Nutrition Facts</h3>
@@ -339,12 +368,12 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
             </TabsContent> */}
-          </Tabs>
-        </div>
-
-        {/* Related Products: requires separate API, currently disabled */}
+        </Tabs>
       </div>
+
+      {/* Related Products: requires separate API, currently disabled */}
     </div>
+
   );
 };
 

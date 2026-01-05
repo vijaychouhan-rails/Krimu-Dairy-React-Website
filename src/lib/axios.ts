@@ -11,7 +11,7 @@ const getHeaders = () => {
     appversion: 512,
     ISCLONEAPP: true,
     CUSTOMERAPP: true,
-    APPKEY: "1234567890"
+    APPKEY: process.env.NEXT_PUBLIC_APP_KEY,
   };
 };
 

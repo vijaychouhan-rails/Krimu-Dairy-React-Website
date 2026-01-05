@@ -115,7 +115,7 @@ const LoginRegister = () => {
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Welcome to DairyFresh</CardTitle>
+              <CardTitle className="text-2xl">Welcome to Krimu</CardTitle>
               <p className="text-muted-foreground">
                 Sign in to your account or create a new one
               </p>

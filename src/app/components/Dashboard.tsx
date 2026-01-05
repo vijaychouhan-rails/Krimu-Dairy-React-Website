@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo } from 'react'
-import { ArrowRight, Truck, Shield, Leaf, Star } from "lucide-react";
+import { ArrowRight, Truck, Shield, Leaf, Star, Minus, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import heroDairy from "../assets/hero-dairy.jpg";
@@ -9,18 +9,24 @@ import Image from "next/image";
 import { Badge } from './ui/badge';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getDashboardData } from '@/services/dashboardService';
-import {GET_ESTORE_DASHBOARD_DATA} from "@/constants/queryName"
+import { GET_ESTORE_DASHBOARD_DATA } from "@/constants/queryName"
 import { DashboardData, Product } from '../types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import showErrorMessages from '@/lib/errorHandle';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store/store';
 import fallbackImage from "../../assets/fallback.png";
+import { addItem, removeItem, updateQuantity } from '@/store/cartSlice';
+import { toast } from 'react-toastify';
+
+import logo from "../../assets/logo.png";
 
 function Dashboard() {
   const { latitude, longitude } = useSelector(
     (state: RootState) => state.location
   );
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const dispatch = useDispatch();
   const features = [
     {
       icon: Truck,
@@ -39,8 +45,6 @@ function Dashboard() {
     }
   ];
 
-  // const latitude = '22.6883834';
-  // const longitude = '75.8284917';
 
   const {
     data,
@@ -49,35 +53,31 @@ function Dashboard() {
     error
   } = useInfiniteQuery({
     queryKey: [GET_ESTORE_DASHBOARD_DATA.name, latitude, longitude],
-    queryFn: ({ pageParam = 1 }):Promise<DashboardData> =>
+    queryFn: ({ pageParam = 1 }): Promise<DashboardData> =>
       getDashboardData({ page: pageParam, latitude, longitude }),
     initialPageParam: 1,
     enabled: !!latitude && !!longitude,
     getNextPageParam: (lastPage) => lastPage?.meta?.next_page ?? undefined,
     retry: false,
-    // getNextPageParam: (lastPage: DashboardData) => {
-    //   if (!lastPage?.meta) return undefined;
-    //   return lastPage?.meta?.next_page;
-    // },
   });
 
   const firstPage = data?.pages[0];
   const categories = firstPage?.categories ?? [];
-  
+
   const categoryProducts = useMemo(() => {
     const catProducts = data?.pages.flatMap(page => page.category_products) ?? [];
     const nonOtherCatProducts = catProducts.filter(({ category }) => category !== "Other");
- 
+
     if (!hasNextPage) {
       const otherProduct = catProducts.find(({ category }) => category === "Other");
       return otherProduct ? [...nonOtherCatProducts, otherProduct] : nonOtherCatProducts;
     }
-    
+
     return nonOtherCatProducts
   }, [data?.pages, hasNextPage]);
 
 
-  useEffect(()=> {
+  useEffect(() => {
     if (error) showErrorMessages({ error: error });
   }, [error])
 
@@ -97,7 +97,7 @@ function Dashboard() {
                 <span className="block text-primary">Delivered Daily</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Experience the finest quality dairy products sourced directly from local farms. 
+                Experience the finest quality dairy products sourced directly from local farms.
                 Fresh, nutritious, and delivered to your doorstep with care.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -106,9 +106,6 @@ function Dashboard() {
                     Shop Now
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Link>
-                </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8">
-                  Learn More
                 </Button>
               </div>
             </div>
@@ -158,7 +155,7 @@ function Dashboard() {
           </div>
         </div>
       </section>
-      
+
       {/* Categories Section */}
       <section className="py-6">
         <div className="container mx-auto px-4">
@@ -188,9 +185,9 @@ function Dashboard() {
                           className="object-contain rounded-xl"
                         />
                       </div>
-                    ) : 
+                    ) :
                       <div className="w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-gray-100 rounded-xl text-gray-400">
-                      🛒 {/* fallback icon */}
+                        🛒 {/* fallback icon */}
                       </div>
                     }
                     <div className="text-3xl mb-3">{category.icon}</div>
@@ -219,7 +216,7 @@ function Dashboard() {
             loader={<h4 className="text-center">Loading more products...</h4>}
           >
             {categoryProducts.map((category) => (
-              <div key= {category.id} className="mb-12">
+              <div key={category.id} className="mb-12">
                 <div className="flex justify-between items-center">
                   <h3 className="text-2xl font-semibold mb-4">{category.category}</h3>
                   <Link
@@ -243,8 +240,8 @@ function Dashboard() {
                                 src={product.pic}
                                 alt={product.product_name}
                                 className={`w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300`}
-                                width={400} 
-                                height={400} 
+                                width={400}
+                                height={400}
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
                                 }}
@@ -252,14 +249,14 @@ function Dashboard() {
                             ) : (
                               <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
                                 <Image
-                                src={fallbackImage}
-                                alt={product.product_name}
-                                className={`w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300`}
-                                width={400} 
-                                height={400} 
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
+                                  src={fallbackImage}
+                                  alt={product.product_name}
+                                  className={`w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300`}
+                                  width={400}
+                                  height={400}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
                                 />
                               </div>
                             )}
@@ -277,7 +274,78 @@ function Dashboard() {
                             )}
                             <div className="flex items-center justify-between">
                               <span className="text-2xl font-bold text-primary">₹{product.price}</span>
-                              <Button>Add to Cart</Button>
+                              {cartItems.some((item) => item.id === product.id) ? (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      const item = cartItems.find((i) => i.id === product.id);
+                                      if (item) {
+                                        if (item.quantity > 0.5) {
+                                          dispatch(
+                                            updateQuantity({
+                                              id: product.id,
+                                              quantity: item.quantity - 0.5,
+                                            })
+                                          );
+                                        } else {
+                                          dispatch(removeItem(product.id));
+                                          toast.success("Removed from cart");
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    <Minus className="h-4 w-4" />
+                                  </Button>
+                                  <span className="w-8 text-center font-medium">
+                                    {cartItems.find((i) => i.id === product.id)?.quantity || 0}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      const item = cartItems.find((i) => i.id === product.id);
+                                      if (item) {
+                                        dispatch(
+                                          updateQuantity({
+                                            id: product.id,
+                                            quantity: item.quantity + 0.5,
+                                          })
+                                        );
+                                      }
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    dispatch(
+                                      addItem({
+                                        id: product.id,
+                                        name: product.product_name,
+                                        price: product.price,
+                                        quantity: 1,
+                                        image: product.pic ?? "",
+                                        category: category.category,
+                                      })
+                                    );
+                                    toast.success("Added to cart");
+                                  }}
+                                >
+                                  Add to Cart
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </Link>
@@ -285,7 +353,7 @@ function Dashboard() {
                     </Card>
                   ))}
 
-                 
+
                 </div>
               </div>
             ))}
@@ -299,12 +367,13 @@ function Dashboard() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="bg-gradient-to-r from-primary to-accent w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                  D
-                </div>
-                <span className="text-xl font-bold">DairyFresh</span>
-              </div>
+              <Image
+                src={logo}
+                alt="Logo"
+                width={80}
+                height={80}
+                className="w-20 "
+              />
               <p className="text-muted-foreground">
                 Your trusted source for fresh, quality dairy products delivered daily.
               </p>

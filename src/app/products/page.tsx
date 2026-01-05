@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { Filter, Grid, List } from "lucide-react";
+import { Filter, Grid, List, Minus, Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Skeleton } from "../components/ui/skeleton";
@@ -14,9 +14,11 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchCategoryProducts, fetchProductCategories } from "@/services/productService";
 import InfiniteScroll from "react-infinite-scroll-component";
 import FreshMilk from "../../assets/fallback.png";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useSearchParams } from "next/navigation";
+import { addItem, removeItem, updateQuantity } from "@/store/cartSlice";
+import { toast } from "react-toastify";
 
 const Categories = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -25,9 +27,11 @@ const Categories = () => {
   );
   const [hasSetDefaultCategory, setHasSetDefaultCategory] = useState(false);
   const searchParams = useSearchParams();
+  const dispatch = useDispatch();
   const { latitude, longitude } = useSelector(
     (state: RootState) => state.location
   );
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const {
     data: categoriesData,
@@ -238,11 +242,10 @@ const Categories = () => {
                   Loading more products...
                 </div>
               }
-              className={`grid gap-6 ${
-                viewMode === "grid"
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                  : "grid-cols-1"
-              }`}
+              className={`grid gap-6 ${viewMode === "grid"
+                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1"
+                }`}
             >
               {categoryProducts.map((product) => (
                 <Card
@@ -280,13 +283,81 @@ const Categories = () => {
                           <span className="text-xl font-bold text-primary">
                             ₹{product.price}
                           </span>
-                          <Button
-                            size="sm"
-                            disabled={!product.in_stock}
-                            className="rounded-full"
-                          >
-                            {product.in_stock ? "Add" : "Sold Out"}
-                          </Button>
+                          {cartItems.some((item) => item.id === product.id) ? (
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const item = cartItems.find((i) => i.id === product.id);
+                                  if (item) {
+                                    if (item.quantity > 0.5) {
+                                      dispatch(
+                                        updateQuantity({
+                                          id: product.id,
+                                          quantity: item.quantity - 0.5,
+                                        })
+                                      );
+                                    } else {
+                                      dispatch(removeItem(product.id));
+                                      toast.success("Removed from cart");
+                                    }
+                                  }
+                                }}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">
+                                {cartItems.find((i) => i.id === product.id)?.quantity || 0}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const item = cartItems.find((i) => i.id === product.id);
+                                  if (item) {
+                                    dispatch(
+                                      updateQuantity({
+                                        id: product.id,
+                                        quantity: item.quantity + 0.5,
+                                      })
+                                    );
+                                  }
+                                }}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={!product.in_stock}
+                              className="rounded-full"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                dispatch(
+                                  addItem({
+                                    id: product.id,
+                                    name: product.product_name,
+                                    price: product.price,
+                                    quantity: 1,
+                                    image: product.pic ?? "",
+                                    category: product.category_name ?? "",
+                                  })
+                                );
+                                toast.success("Added to cart");
+                              }}
+                            >
+                              {product.in_stock ? "Add" : "Sold Out"}
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </Link>
