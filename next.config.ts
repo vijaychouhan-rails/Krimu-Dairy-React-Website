@@ -16,7 +16,8 @@ const nextConfig: NextConfig = {
         port: '3000',
       },
       {
-        hostname: 'https://api.krimu.in/'
+        protocol: "https",
+        hostname: "api.krimu.in",
       }
     ],
   }
