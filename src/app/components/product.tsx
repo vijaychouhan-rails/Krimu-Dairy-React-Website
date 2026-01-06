@@ -15,7 +15,7 @@ import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList } from "./ui/tabs";
 import freshMilk from "../../assets/fallback.png";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,7 +34,7 @@ const ProductDetail = () => {
     product_images?: { image_url?: string | null }[];
   } | null>(null);
 
-  const router = useRouter();
+
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
   // Fetch product details by ID
