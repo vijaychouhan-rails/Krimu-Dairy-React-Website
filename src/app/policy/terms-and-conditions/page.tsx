@@ -11,7 +11,7 @@ const TermsAndConditions = () => {
 
                 <section className="bg-white shadow-sm rounded-2xl p-8 md:p-12 mb-8">
                     <p className="mb-6 leading-relaxed">
-                        The terms <strong>Krimu Dairy</strong> individually and collectively refer to Krimu Dairy and the terms <strong>"User"</strong> refers to the users.
+                        The terms <strong>Krimu Dairy</strong> individually and collectively refer to Krimu Dairy and the terms <strong>&quot;User&quot;</strong> refers to the users.
                     </p>
                     <p className="mb-6 leading-relaxed">
                         This page states the Terms and Conditions under which you (Visitor) may visit this website (“Website”) and mobile app. (“Mobile Application”). Please read this page carefully. If you do not accept the Terms and Conditions stated here, we would request you to exit this site. The business, any of its business divisions and / or its subsidiaries, associate companies or subsidiaries to subsidiaries or such other investment companies (in India or abroad) reserve their respective rights to revise these Terms and Conditions at any time by updating this posting. You should visit this page periodically to re-appraise yourself of the Terms and Conditions, because they are binding on all users of this Website.
@@ -69,13 +69,13 @@ const TermsAndConditions = () => {
                     <section id="liability" className="bg-white shadow-sm rounded-2xl p-8 md:p-12 scroll-mt-24">
                         <h2 className="text-2xl font-bold mb-6 text-gray-900">LIABILITY</h2>
                         <p className="mb-4 leading-relaxed">
-                            User agrees that neither Krimu Dairy nor its group companies, directors, officers or employee shall be liable for any direct or/and indirect or/and incidental or/and special or/and consequential or/and exemplary damages, resulting from the use or/and the inability to use the service or/and for cost of procurement of substitute goods or/and services or resulting from any goods or/and data or/and information or/and services purchased or/and obtained or/and messages received or/and transactions entered into through or/and from the service or/and resulting from unauthorized access to or/and alteration of user's transmissions or/and data or/and arising from any other matter relating to the service, including but not limited to, damages for loss of profits or/and use or/and data or other intangible, even if Krimu Dairy has been advised of the possibility of such damages.
+                            User agrees that neither Krimu Dairy nor its group companies, directors, officers or employee shall be liable for any direct or/and indirect or/and incidental or/and special or/and consequential or/and exemplary damages, resulting from the use or/and the inability to use the service or/and for cost of procurement of substitute goods or/and services or resulting from any goods or/and data or/and information or/and services purchased or/and obtained or/and messages received or/and transactions entered into through or/and from the service or/and resulting from unauthorized access to or/and alteration of user s transmissions or/and data or/and arising from any other matter relating to the service, including but not limited to, damages for loss of profits or/and use or/and data or other intangible, even if Krimu Dairy has been advised of the possibility of such damages.
                         </p>
                         <p className="mb-4 leading-relaxed">
                             User further agrees that Krimu Dairy shall not be liable for any damages arising from interruption, suspension or termination of service, including but not limited to direct or/and indirect or/and incidental or/and special consequential or/and exemplary damages, whether such interruption or/and suspension or/and termination was justified or not, negligent or intentional, inadvertent or advertent.
                         </p>
                         <p className="leading-relaxed">
-                            User agrees that Krimu Dairy shall not be responsible or liable to user, or anyone, for the statements or conduct of any third party of the service. In sum, in no event shall Krimu Dairy's total liability to the User for all damages or/and losses or/and causes of action exceed the amount paid by the User to Krimu Dairy, if any, that is related to the cause of action.
+                            User agrees that Krimu Dairy shall not be responsible or liable to user, or anyone, for the statements or conduct of any third party of the service. In sum, in no event shall Krimu Dairy s total liability to the User for all damages or/and losses or/and causes of action exceed the amount paid by the User to Krimu Dairy, if any, that is related to the cause of action.
                         </p>
                     </section>
 
@@ -128,7 +128,7 @@ const TermsAndConditions = () => {
                                 <h3 className="text-xl font-semibold mb-2 text-gray-800">Incorrect Addresses</h3>
                                 <p className="font-medium text-gray-700 mb-1">Customer Responsibility</p>
                                 <p className="text-gray-600">
-                                    It is the customer's responsibility to provide accurate shipping information. Please double-check your shipping address at checkout. If you notice an error, contact us at <a href="mailto:krimudairy335802@gmail.com" className="text-blue-600 hover:underline">krimudairy335802@gmail.com</a> as soon as possible.
+                                    It is the customer s responsibility to provide accurate shipping information. Please double-check your shipping address at checkout. If you notice an error, contact us at <a href="mailto:krimudairy335802@gmail.com" className="text-blue-600 hover:underline">krimudairy335802@gmail.com</a> as soon as possible.
                                 </p>
                             </div>
 

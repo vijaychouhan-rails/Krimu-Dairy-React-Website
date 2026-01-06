@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
 
                 <section className="bg-white shadow-sm rounded-2xl p-8 md:p-12 mb-8">
                     <p className="mb-6 leading-relaxed">
-                        Thank you for choosing to be part of our community at Krimu Dairy ("Company," "we," "us," or "our"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us at <a href="mailto:krimudairy335802@gmail.com" className="text-blue-600 hover:text-blue-800 transition-colors">krimudairy335802@gmail.com</a>.
+                        Thank you for choosing to be part of our community at Krimu Dairy (&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us at <a href="mailto:krimudairy335802@gmail.com" className="text-blue-600 hover:text-blue-800 transition-colors">krimudairy335802@gmail.com</a>.
                     </p>
                     <p className="mb-6 leading-relaxed">
                         This privacy notice describes how we might use your information if you:
@@ -24,8 +24,8 @@ const PrivacyPolicy = () => {
                         In this privacy notice, if we refer to:
                     </p>
                     <ul className="list-disc pl-6 mb-6 space-y-2 text-gray-700">
-                        <li><strong>"App,"</strong> we are referring to any application of ours that references or links to this policy, including any listed above.</li>
-                        <li><strong>"Services,"</strong> we are referring to our App, and other related services, including any sales, marketing, or events.</li>
+                        <li><strong>&quot;App,&quot;</strong> we are referring to any application of ours that references or links to this policy, including any listed above.</li>
+                        <li><strong>&quot;Services,&quot;</strong> we are referring to our App, and other related services, including any sales, marketing, or events.</li>
                     </ul>
                     <p className="mb-6 leading-relaxed text-gray-700">
                         The purpose of this privacy notice is to explain to you in the clearest way possible what information we collect, how we use it, and what rights you have in relation to it. If there are any terms in this privacy notice that you do not agree with, please discontinue use of our Services immediately.
@@ -84,7 +84,7 @@ const PrivacyPolicy = () => {
                         <p className="mb-4 leading-relaxed">Like many businesses, we also collect information through cookies and similar technologies.</p>
                         <p className="mb-4 leading-relaxed">The information we collect includes:</p>
                         <ul className="list-disc pl-6 mb-6 space-y-2 text-gray-700">
-                            <li><strong>Log and Usage Data.</strong> Log and usage data is service-related, diagnostic, usage and performance information our servers automatically collect when you access or use our App and which we record in log files. Depending on how you interact with us, this log data may include your IP address, device information, browser type and settings and information about your activity in the App (such as the date/time stamps associated with your usage, pages and files viewed, searches and other actions you take such as which features you use), device event information (such as system activity, error reports (sometimes called 'crash dumps') and hardware settings).</li>
+                            <li><strong>Log and Usage Data.</strong> Log and usage data is service-related, diagnostic, usage and performance information our servers automatically collect when you access or use our App and which we record in log files. Depending on how you interact with us, this log data may include your IP address, device information, browser type and settings and information about your activity in the App (such as the date/time stamps associated with your usage, pages and files viewed, searches and other actions you take such as which features you use), device event information (such as system activity, error reports (sometimes called  crash dumps ) and hardware settings).</li>
                             <li><strong>Device Data.</strong> We collect device data such as information about your computer, phone, tablet or other device you use to access the App. Depending on the device used, this device data may include information such as your IP address (or proxy server), device and application identification numbers, location, browser type, hardware model Internet service provider and/or mobile carrier, operating system and system configuration information.</li>
                         </ul>
 
@@ -110,7 +110,7 @@ const PrivacyPolicy = () => {
                             <li>To facilitate account creation and logon process.</li>
                             <li>To post testimonials. We post testimonials on our App that may contain personal information. Prior to posting a testimonial, we will obtain your consent to use your name and the content of the testimonial. If you wish to update, or delete your testimonial, please contact us at <a href="mailto:krimudairy335802@gmail.com" className="text-blue-600 hover:underline">krimudairy335802@gmail.com</a> and be sure to include your name, testimonial location, and contact information.</li>
                             <li>Request feedback. We may use your information to request feedback and to contact you about your use of our App.</li>
-                            <li>To enable user-to-user communications. We may use your information in order to enable user-to-user communications with each user's consent.</li>
+                            <li>To enable user-to-user communications. We may use your information in order to enable user-to-user communications with each user s consent.</li>
                             <li>To manage user accounts. We may use your information for the purposes of managing our account and keeping it in working order.</li>
                             <li>To send administrative information to you. We may use your personal information to send you product, service and new feature information and/or information about changes to our terms, conditions, and policies.</li>
                             <li>To protect our Services. We may use your information as part of our efforts to keep our App safe and secure (for example, for fraud monitoring and prevention).</li>
@@ -202,7 +202,7 @@ const PrivacyPolicy = () => {
                     <section id="dnt" className="bg-white shadow-sm rounded-2xl p-8 md:p-12 scroll-mt-24">
                         <h2 className="text-2xl font-bold mb-6 text-gray-900">9. CONTROLS FOR DO-NOT-TRACK FEATURES</h2>
                         <p className="leading-relaxed">
-                            Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ("DNT") feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage no uniform technology standard for recognizing and implementing DNT signals has been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this privacy notice.
+                            Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track (&quot;DNT&quot;) feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage no uniform technology standard for recognizing and implementing DNT signals has been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this privacy notice.
                         </p>
                     </section>
 
@@ -210,7 +210,7 @@ const PrivacyPolicy = () => {
                         <h2 className="text-2xl font-bold mb-6 text-gray-900">10. DO CALIFORNIA RESIDENTS HAVE SPECIFIC PRIVACY RIGHTS?</h2>
                         <p className="mb-4 text-gray-600 italic">In Short: Yes, if you are a resident of California, you are granted specific rights regarding access to your personal information.</p>
                         <p className="mb-4 leading-relaxed">
-                            California Civil Code Section 1798.83, also known as the "Shine The Light" law, permits our users who are California residents to request and obtain from us, once a year and free of charge, information about categories of personal information (if any) we disclosed to third parties for direct marketing purposes and the names and addresses of all third parties with which we shared personal information in the immediately preceding calendar year. If you are a California resident and would like to make such a request, please submit your request in writing to us using the contact information provided below.
+                            California Civil Code Section 1798.83, also known as the &quot;Shine The Light&quot; law, permits our users who are California residents to request and obtain from us, once a year and free of charge, information about categories of personal information (if any) we disclosed to third parties for direct marketing purposes and the names and addresses of all third parties with which we shared personal information in the immediately preceding calendar year. If you are a California resident and would like to make such a request, please submit your request in writing to us using the contact information provided below.
                         </p>
                         <p className="leading-relaxed">
                             If you are under 18 years of age, reside in California, and have a registered account with the App, you have the right to request removal of unwanted data that you publicly post on the App. To request removal of such data, please contact us using the contact information provided below, and include the email address associated with your account and a statement that you reside in California. We will make sure the data is not publicly displayed on the App, but please be aware that the data may not be completely or comprehensively removed from all our systems (e.g. backups, etc.).
@@ -221,7 +221,7 @@ const PrivacyPolicy = () => {
                         <h2 className="text-2xl font-bold mb-6 text-gray-900">11. DO WE MAKE UPDATES TO THIS NOTICE?</h2>
                         <p className="mb-4 text-gray-600 italic">In Short: Yes, we will update this notice as necessary to stay compliant with relevant laws.</p>
                         <p className="leading-relaxed">
-                            We may update this privacy notice from time to time. The updated version will be indicated by an updated "Revised" date and the updated version will be effective as soon as it is accessible. If we make material changes to this privacy notice, we may notify you either by prominently posting a notice of such changes or by directly sending you a notification. We encourage you to review this privacy notice frequently to be informed of how we are protecting your information.
+                            We may update this privacy notice from time to time. The updated version will be indicated by an updated &quot;Revised&quot; date and the updated version will be effective as soon as it is accessible. If we make material changes to this privacy notice, we may notify you either by prominently posting a notice of such changes or by directly sending you a notification. We encourage you to review this privacy notice frequently to be informed of how we are protecting your information.
                         </p>
                     </section>
 
