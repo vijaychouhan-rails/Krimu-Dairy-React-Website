@@ -267,6 +267,11 @@ const Categories = () => {
                             Out of Stock
                           </Badge>
                         )}
+                        {product.in_stock && !product.available_on_location && (
+                          <Badge variant="destructive" className="absolute top-2 right-2">
+                            Unavailable at location
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="p-4 space-y-2">
@@ -337,7 +342,7 @@ const Categories = () => {
                           ) : (
                             <Button
                               size="sm"
-                              disabled={!product.in_stock}
+                              disabled={!product.in_stock || !product.available_on_location}
                               className="rounded-full"
                               onClick={(e) => {
                                 e.preventDefault();
@@ -355,7 +360,11 @@ const Categories = () => {
                                 toast.success("Added to cart");
                               }}
                             >
-                              {product.in_stock ? "Add" : "Sold Out"}
+                              {!product.in_stock
+                                ? "Sold Out"
+                                : !product.available_on_location
+                                  ? "Unavailable"
+                                  : "Add"}
                             </Button>
                           )}
                         </div>

@@ -186,7 +186,7 @@ function Dashboard() {
                         />
                       </div>
                     ) :
-                      <div className="w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-gray-100 rounded-xl text-gray-400">
+                      <div style={{ fontSize: "2.5rem" }} className="w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-gray-100 rounded-xl text-gray-400">
                         🛒 {/* fallback icon */}
                       </div>
                     }
@@ -263,15 +263,21 @@ function Dashboard() {
                             <Badge className="absolute top-4 left-4 bg-card text-card-foreground">
                               {category.category}
                             </Badge>
+                            {!product.in_stock && (
+                              <Badge className="absolute top-4 right-4 bg-yellow-500 text-black">
+                                Out of Stock
+                              </Badge>
+                            )}
+                            {product.in_stock && !product.available_on_location && (
+                              <Badge variant="destructive" className="absolute top-4 right-4">
+                                Unavailable at location
+                              </Badge>
+                            )}
                           </div>
                           <div className="p-6">
                             <h3 className="text-xl font-semibold mb-2">{product.product_name}</h3>
                             <p className="text-muted-foreground mb-4">{product.detail || "No details available"}</p>
-                            {product.in_stock === false && (
-                              <Badge variant="destructive" className="mb-2">
-                                Out of stock
-                              </Badge>
-                            )}
+
                             <div className="flex items-center justify-between">
                               <span className="text-2xl font-bold text-primary">₹{product.price}</span>
                               {cartItems.some((item) => item.id === product.id) ? (
@@ -327,6 +333,7 @@ function Dashboard() {
                                 </div>
                               ) : (
                                 <Button
+                                  disabled={!product.in_stock || !product.available_on_location}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -343,7 +350,11 @@ function Dashboard() {
                                     toast.success("Added to cart");
                                   }}
                                 >
-                                  Add to Cart
+                                  {!product.in_stock
+                                    ? "Sold Out"
+                                    : !product.available_on_location
+                                      ? "Unavailable"
+                                      : "Add to Cart"}
                                 </Button>
                               )}
                             </div>
@@ -382,16 +393,13 @@ function Dashboard() {
               <h3 className="font-semibold mb-4">Quick Links</h3>
               <div className="space-y-2">
                 <Link href="/products" className="block text-muted-foreground hover:text-primary">Products</Link>
-                <Link href="/about" className="block text-muted-foreground hover:text-primary">About Us</Link>
-                <Link href="/contact" className="block text-muted-foreground hover:text-primary">Contact</Link>
               </div>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <div className="space-y-2">
-                <Link href="/help" className="block text-muted-foreground hover:text-primary">Help Center</Link>
-                <Link href="/shipping" className="block text-muted-foreground hover:text-primary">Shipping Info</Link>
-                <Link href="/returns" className="block text-muted-foreground hover:text-primary">Returns</Link>
+                <Link href="/policy/privacyPolicy" className="block text-muted-foreground hover:text-primary">privacy policy</Link>
+                <Link href="/policy/terms-and-conditions" className="block text-muted-foreground hover:text-primary">terms and conditions</Link>
               </div>
             </div>
           </div>

@@ -70,14 +70,14 @@ const Cart = () => {
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [paymentMode, setPaymentMode] = useState<"COD">("COD");
   const [couponCode, setCouponCode] = useState("");
-  const [couponPaymentInfo, setCouponPaymentInfo] = useState<CartPaymentInfo | null>(null);
+  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
   const [saveAddress, setSaveAddress] = useState(false);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [editAddressDialogOpen, setEditAddressDialogOpen] = useState(false);
   const [pendingEditAddress, setPendingEditAddress] = useState<EditAddressData | null>(null);
 
   const dispatch = useDispatch();
-  
+
   const items = useSelector((state: RootState) => state.cart.items);
   const locationState = useSelector((state: RootState) => state.location);
   const {
@@ -152,7 +152,7 @@ const Cart = () => {
         address: addressPayload,
         deliveryDate,
         deliveryInstruction: deliveryInstructions,
-        couponCode,
+        couponCode: appliedCouponCode || "",
       });
     },
     onSuccess: (res: PlaceOrderResponse) => {
@@ -160,7 +160,7 @@ const Cart = () => {
         toast.success("Order Placed Successfully!")
         dispatch(clearCart());
         router.push('/');
-      }else{
+      } else {
         showErrorMessages({ error: res.messages });
       }
     },
@@ -171,7 +171,7 @@ const Cart = () => {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 50 ? 0 : 5.99;
   const tax = subtotal * 0.08;
-  const total = subtotal  + tax;
+  const total = subtotal + tax;
 
   const { data: cartPaymentData } = useQuery<CartPaymentInformationResponse>({
     queryKey: [
@@ -179,21 +179,21 @@ const Cart = () => {
       productsForPaymentInfo,
       latitude,
       longitude,
+      appliedCouponCode,
     ],
     queryFn: () =>
       fetchCartPaymentInformation({
         products: productsForPaymentInfo,
         latitude: Number(latitude),
         longitude: Number(longitude),
-        couponCode: null,
+        couponCode: appliedCouponCode,
       }),
     enabled:
       cartItems.length > 0 && !!latitude && !!longitude,
     retry: false,
   });
 
-  const effectivePaymentInfo = couponPaymentInfo ?? cartPaymentData?.payment_info;
-  const backendPaymentInfo = effectivePaymentInfo;
+  const backendPaymentInfo = cartPaymentData?.payment_info;
   const displaySubtotal = backendPaymentInfo
     ? backendPaymentInfo.total_amount - backendPaymentInfo.gst_amount
     : subtotal;
@@ -223,11 +223,12 @@ const Cart = () => {
 
       if (info?.errors && info.errors.length > 0) {
         toast.error(info.errors[0]);
-        setCouponPaymentInfo(null);
+        setAppliedCouponCode(null);
         return;
       }
 
-      setCouponPaymentInfo(info);
+      setAppliedCouponCode(couponCode);
+      toast.success("Coupon Applied Successfully");
     },
     onError: (error: { message?: string }) => {
       showErrorMessages({ error: error.message ?? "Something went wrong" });
@@ -249,7 +250,7 @@ const Cart = () => {
       });
     },
     onSuccess: () => {
-      setCouponPaymentInfo(null);
+      setAppliedCouponCode(null);
       setCouponCode("");
     },
     onError: (error: { message?: string }) => {
@@ -304,7 +305,7 @@ const Cart = () => {
                           height={400}
                         />
                       </div>
-                      
+
                       <div className="flex-1">
                         <h3 className="font-semibold">{item.name}</h3>
                         <p className="text-sm text-muted-foreground">{item.category}</p>
@@ -460,21 +461,21 @@ const Cart = () => {
                         type="text"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
-                        disabled={!!couponPaymentInfo}
+                        disabled={!!appliedCouponCode}
                         placeholder="Enter coupon"
                         className="flex-1 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       />
                       <Button
                         type="button"
                         variant="outline"
-                        disabled={!couponPaymentInfo && !couponCode}
+                        disabled={!appliedCouponCode && !couponCode}
                         onClick={() =>
-                          couponPaymentInfo
+                          appliedCouponCode
                             ? removeCoupon.mutate()
                             : applyCoupon.mutate()
                         }
                       >
-                        {couponPaymentInfo ? "Remove" : "Apply"}
+                        {appliedCouponCode ? "Remove" : "Apply"}
                       </Button>
                     </div>
                   </div>
@@ -490,7 +491,7 @@ const Cart = () => {
                       <span>GST</span>
                       <span>₹ {displayGst.toFixed(2)}</span>
                     </div>
-                    {couponPaymentInfo && (
+                    {appliedCouponCode && (
                       <div className="flex justify-between text-sm text-green-600">
                         <span>Discount</span>
                         <span>- ₹ {displayDiscount.toFixed(2)}</span>
@@ -499,7 +500,7 @@ const Cart = () => {
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>
-                      {couponPaymentInfo ? (
+                      {appliedCouponCode ? (
                         <span className="space-x-2">
                           <span className="line-through text-sm text-muted-foreground">
                             ₹ {displayOriginalTotal.toFixed(2)}
