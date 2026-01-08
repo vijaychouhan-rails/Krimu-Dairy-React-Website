@@ -18,7 +18,7 @@ import { fetchAuth } from "@/lib/appCookies";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePickerField from "../components/field";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { LocationMapDialog } from "../components/LocationMapDialog";
 import { EditAddressLabelDialog, type EditAddressData } from "../components/EditAddressLabelDialog";
 import { setLocation, setLocationAddress } from "@/store/locationSlice";
@@ -94,6 +94,7 @@ const Cart = () => {
   } = locationState;
   const authData = fetchAuth();
   const userId = authData.user_id;
+  const isLoggedIn = authData?.isLoggedIn;
 
   const productsForPaymentInfo = cartItems.map((item: CartItem) => ({
     id: item.id,
@@ -261,6 +262,10 @@ const Cart = () => {
   useEffect(() => {
     setCartItems(items)
   }, [items])
+
+  if(!isLoggedIn){
+    redirect('/login')
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -176,20 +176,15 @@ function Dashboard() {
               >
                 <Card className="group hover:shadow-card transition-all duration-300 hover:-translate-y-1">
                   <CardContent className="p-6 text-center">
-                    {category.category_image_url ? (
-                      <div className="w-20 h-20 mx-auto mb-3 relative">
-                        <Image
-                          src={category.category_image_url}
-                          alt={category.name}
-                          fill
-                          className="object-contain rounded-xl"
-                        />
-                      </div>
-                    ) :
-                      <div style={{ fontSize: "2.5rem" }} className="w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-gray-100 rounded-xl text-gray-400">
-                        🛒 {/* fallback icon */}
-                      </div>
-                    }
+                    <div className="w-48 h-48 mx-auto mb-3 relative">
+                      <Image
+                        src={category.category_image_url || fallbackImage}
+                        alt={category.name}
+                        fill
+                        className="rounded-xl object-cover"
+                      />
+                    </div>
+
                     <div className="text-3xl mb-3">{category.icon}</div>
                     <h3 className="font-semibold mb-1">{category.name}</h3>
                   </CardContent>
@@ -404,7 +399,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="border-t mt-12 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2025 DairyFresh. All rights reserved.</p>
+            <p>&copy; 2025 - 2026 DairyFresh. All rights reserved.</p>
           </div>
         </div>
       </footer>
