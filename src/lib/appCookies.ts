@@ -42,5 +42,6 @@ export const fetchAuth = () => {
     isLoggedIn,
     user_name: headers?.name,
     user_id: headers?.id,
+    isDairyJoined: headers?.isDairyJoined
   }
 }

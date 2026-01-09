@@ -54,6 +54,7 @@ export const login = async ({
           id: response?.data?.data?.id,
           name: response?.data?.data?.name,
           dairyName: response?.data?.data?.dairy_name,
+          isDairyJoined: response?.data?.data?.joined_brand_app_dairy,
         };
         setCookies({ headers });
         return { success: true };

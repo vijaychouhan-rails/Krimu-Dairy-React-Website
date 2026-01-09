@@ -7,6 +7,7 @@ import AppLayout from "./components/AppLayout";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import { ToastContainer } from "react-toastify";
+import GlobalAuthGuard from "./components/GlobalAuthguard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <AppLayout>
+              <GlobalAuthGuard />
               {children}
             </AppLayout>
           </QueryClientProvider>

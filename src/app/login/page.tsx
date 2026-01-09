@@ -22,6 +22,7 @@ const LoginRegister = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isValidMobile = (value: string) => /^\d{10}$/.test(value);
 
   // Register state
   const [fullName, setFullName] = useState("");
@@ -47,6 +48,11 @@ const LoginRegister = () => {
         return;
       }
 
+      if (!isValidMobile(mobileNo)) {
+        setError("Must be a number");
+        return;
+      }
+
       const result = await login({ mobileNo, password });
       if (result?.success) {
         // route.push(redirectTo)
@@ -63,6 +69,11 @@ const LoginRegister = () => {
 
     if (!fullName || !registerMobileNo || !registerPassword) {
       setRegisterError("All fields are required.");
+      return;
+    }
+
+    if (!isValidMobile(mobileNo)) {
+      setRegisterError("Must be a number");
       return;
     }
 
