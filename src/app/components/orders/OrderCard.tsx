@@ -13,7 +13,7 @@ export const OrderCard = ({ order, onClick }: OrderCardProps) => {
   return (
     <Card
       onClick={onClick}
-      className="p-6 mt-3 cursor-pointer transition-all duration-300 hover:shadow-lg border-border/50 hover:border-primary/30 bg-card"
+      className="p-6 mt-3 cursor-pointer transition-all duration-300 hover:shadow-lg border-border/50 hover:border-primary/30 bg-card max-w-full"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-4">
