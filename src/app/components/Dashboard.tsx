@@ -223,7 +223,7 @@ function Dashboard() {
                     view all
                   </Link>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   {category.products.map((product: Product) => (
                     <Card key={product.id} className={`group hover:shadow-card transition-all duration-300 ${!isServiceAvailable ? "opacity-60 pointer-events-none" : ""}`}>
                       <CardContent className="p-0">
@@ -235,7 +235,7 @@ function Dashboard() {
                               <Image
                                 src={product.pic}
                                 alt={product.product_name}
-                                className={`w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300`}
+                                className={`w-full aspect-square object-contain`}
                                 width={400}
                                 height={400}
                                 onError={(e) => {
@@ -247,7 +247,7 @@ function Dashboard() {
                                 <Image
                                   src={fallbackImage}
                                   alt={product.product_name}
-                                  className={`w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300`}
+                                  className={`w-full aspect-square object-contain`}
                                   width={400}
                                   height={400}
                                   onError={(e) => {

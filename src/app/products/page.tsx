@@ -243,7 +243,7 @@ const Categories = () => {
                 </div>
               }
               className={`grid gap-6 ${viewMode === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                ? "grid-cols-1 sm:grid-cols-3 lg:grid-cols-4"
                 : "grid-cols-1"
                 }`}
             >
@@ -264,7 +264,7 @@ const Categories = () => {
                           alt={product.product_name}
                           width={400}
                           height={300}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full aspect-square object-contain"
                         />
                         {!product.in_stock && (
                           <Badge className="absolute top-2 right-2 bg-yellow-500 text-black">
