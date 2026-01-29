@@ -1,52 +1,43 @@
-import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { DeliveryStatus } from "../../types";
+import { cn } from "@/lib/utils";
 
 interface OrderFiltersProps {
-  activeFilter: {status: "all" | DeliveryStatus};
+  activeFilter: { status: "all" | DeliveryStatus };
   handlestatus: (filter: "all" | DeliveryStatus) => void;
-  counts?: {
-    all: number;
-    pending: number;
-    delivered: number;
-    cancelled: number;
-  };
+  counts?: { [key: string]: number };
 }
 
 export const OrderFilters = ({ activeFilter, handlestatus }: OrderFiltersProps) => {
+  const filters: { label: string; value: "all" | DeliveryStatus }[] = [
+    { label: "All Orders", value: "all" },
+    { label: "Pending", value: "pending" },
+    { label: "Confirmed", value: "confirmed" },
+    { label: "Delivered", value: "delivered" },
+    { label: "Cancelled", value: "cancelled" },
+    { label: "Declined", value: "declined" },
+  ];
+
   return (
-    <Tabs value={activeFilter.status} onValueChange={(v) => handlestatus(v as "all" | DeliveryStatus)}>
-      <TabsList className="grid w-full grid-cols-4 h-auto">
-        <TabsTrigger value="all" className="gap-2">
-          All
-          {/* <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-semibold">
-            {counts.all}
-          </span> */}
-        </TabsTrigger>
-        <TabsTrigger value="pending" className="gap-2">
-          Pending
-          {/* <span className="bg-warning/10 text-warning px-2 py-0.5 rounded-full text-xs font-semibold">
-            {counts.pending}
-          </span> */}
-        </TabsTrigger>
-        <TabsTrigger value="confirmed" className="gap-2">
-          Confirmed
-        </TabsTrigger>
-        <TabsTrigger value="delivered" className="gap-2">
-          Delivered
-          {/* <span className="bg-success/10 text-success px-2 py-0.5 rounded-full text-xs font-semibold">
-            {counts.delivered}
-          </span> */}
-        </TabsTrigger>
-        <TabsTrigger value="declined" className="gap-2">
-          Declined
-        </TabsTrigger>
-        <TabsTrigger value="cancelled" className="gap-2">
-          Cancelled
-          {/* <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded-full text-xs font-semibold">
-            {counts.cancelled}
-          </span> */}
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
+    <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex items-center gap-2 min-w-max p-1">
+        {filters.map((filter) => {
+          const isActive = activeFilter.status === filter.value;
+          return (
+            <button
+              key={filter.value}
+              onClick={() => handlestatus(filter.value)}
+              className={cn(
+                "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 ring-2 ring-primary ring-offset-2 ring-offset-background"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              {filter.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };

@@ -28,7 +28,7 @@ const Categories = () => {
   const [hasSetDefaultCategory, setHasSetDefaultCategory] = useState(false);
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
-  const { latitude, longitude } = useSelector(
+  const { latitude, longitude, isServiceAvailable } = useSelector(
     (state: RootState) => state.location
   );
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -243,24 +243,28 @@ const Categories = () => {
                 </div>
               }
               className={`grid gap-6 ${viewMode === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                ? "grid-cols-1 sm:grid-cols-3 lg:grid-cols-4"
                 : "grid-cols-1"
                 }`}
             >
               {categoryProducts.map((product) => (
                 <Card
                   key={product.id}
-                  className="group hover:shadow-md transition-shadow duration-300 rounded-2xl border"
+                  className={`group hover:shadow-md transition-shadow duration-300 rounded-2xl border ${!isServiceAvailable ? "opacity-60 pointer-events-none" : ""
+                    }`}
                 >
                   <CardContent className="p-0">
-                    <Link href={`/product/${product.id}`}>
+                    <Link
+                      href={isServiceAvailable ? `/product/${product.id}` : "#"}
+                      className={!isServiceAvailable ? "cursor-not-allowed pointer-events-none" : ""}
+                    >
                       <div className="relative overflow-hidden rounded-t-2xl">
                         <Image
                           src={product.pic || FreshMilk}
                           alt={product.product_name}
                           width={400}
                           height={300}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full aspect-square object-contain"
                         />
                         {!product.in_stock && (
                           <Badge className="absolute top-2 right-2 bg-yellow-500 text-black">
@@ -289,11 +293,14 @@ const Categories = () => {
                             ₹{product.price}
                           </span>
                           {cartItems.some((item) => item.id === product.id) ? (
-                            <div className="flex items-center gap-2">
+                            <div className={`flex items-center gap-2 ${!isServiceAvailable ? "pointer-events-auto" : "" // Allow interaction if already in cart? Maybe not if service unavailable now
+                              }`}>
+                              {/* If service unavailable, we should probably verify if they can edit cart. Assuming NO for now, but keeping simple UI rules. */}
                               <Button
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8"
+                                disabled={!isServiceAvailable}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -322,6 +329,7 @@ const Categories = () => {
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8"
+                                disabled={!isServiceAvailable}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -342,8 +350,12 @@ const Categories = () => {
                           ) : (
                             <Button
                               size="sm"
-                              disabled={!product.in_stock || !product.available_on_location}
-                              className="rounded-full"
+                              disabled={
+                                !product.in_stock ||
+                                !product.available_on_location ||
+                                !isServiceAvailable
+                              }
+                              className={`rounded-full ${!isServiceAvailable ? "pointer-events-auto" : ""}`} // Make button visible/interactive enough to show disabled state properly
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -364,7 +376,9 @@ const Categories = () => {
                                 ? "Sold Out"
                                 : !product.available_on_location
                                   ? "Unavailable"
-                                  : "Add"}
+                                  : !isServiceAvailable
+                                    ? "Unavailable"
+                                    : "Add"}
                             </Button>
                           )}
                         </div>

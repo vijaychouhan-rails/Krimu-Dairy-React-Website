@@ -36,6 +36,9 @@ const ProductDetail = () => {
 
 
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const { isServiceAvailable } = useSelector(
+    (state: RootState) => state.location
+  );
 
   // Fetch product details by ID
   useEffect(() => {
@@ -202,6 +205,7 @@ const ProductDetail = () => {
                           }
                         }
                       }}
+                      disabled={!isServiceAvailable}
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
@@ -217,6 +221,7 @@ const ProductDetail = () => {
                           dispatch(updateQuantity({ id: product.id, quantity: item.quantity + 0.5 }));
                         }
                       }}
+                      disabled={!isServiceAvailable}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -231,7 +236,7 @@ const ProductDetail = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setQuantity(Math.max(1, quantity - 0.5))}
-                        disabled={quantity <= 0.5}
+                        disabled={quantity <= 0.5 || !isServiceAvailable}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -242,6 +247,7 @@ const ProductDetail = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setQuantity(quantity + 0.5)}
+                        disabled={!isServiceAvailable}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -250,11 +256,11 @@ const ProductDetail = () => {
                   <Button
                     size="lg"
                     className="w-full"
-                    disabled={!product.in_stock}
+                    disabled={!product.in_stock || !isServiceAvailable}
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart - ₹ {(product.price * quantity).toFixed(2)}
+                    {!isServiceAvailable ? "Unavailable" : `Add to Cart - ₹ ${(product.price * quantity).toFixed(2)}`}
                   </Button>
                 </>
               )}

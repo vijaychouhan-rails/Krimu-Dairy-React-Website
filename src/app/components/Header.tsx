@@ -15,7 +15,7 @@ import { logoutOperation } from "@/services/auth";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { clearCart } from "@/store/cartSlice";
-import { setLocation, setLocationAddress } from "@/store/locationSlice";
+import { setLocation, setLocationAddress, setServiceAvailability } from "@/store/locationSlice";
 import { getAddressFromCoordinates } from "@/services/geocoderService";
 import { LocationMapDialog } from "./LocationMapDialog";
 import { EditAddressLabelDialog, type EditAddressData } from "./EditAddressLabelDialog";
@@ -252,20 +252,38 @@ const HeaderContent: React.FC = () => {
       .then((res: { success?: boolean; service_available_in_area?: boolean }) => {
         if (res && res.success && res.service_available_in_area) {
           setServiceAvailable(true);
+          dispatch(setServiceAvailability(true));
+          sessionStorage.removeItem("krimu:serviceUnavailableShown");
+
           if (pathname === "/service-not-available") {
             window.location.replace("/");
           }
         } else {
           setServiceAvailable(false);
-          if (pathname !== "/service-not-available") {
-            window.location.replace("/service-not-available");
+          dispatch(setServiceAvailability(false));
+
+          const hasShownWarning = sessionStorage.getItem("krimu:serviceUnavailableShown");
+
+          if (!hasShownWarning) {
+            sessionStorage.setItem("krimu:serviceUnavailableShown", "true");
+
+            if (pathname !== "/service-not-available") {
+              window.location.replace("/service-not-available");
+            }
+          } else {
           }
         }
       })
       .catch(() => {
         setServiceAvailable(false);
-        if (pathname !== "/service-not-available") {
-          window.location.replace("/service-not-available");
+        dispatch(setServiceAvailability(false));
+        const hasShownWarning = sessionStorage.getItem("krimu:serviceUnavailableShown");
+
+        if (!hasShownWarning) {
+          sessionStorage.setItem("krimu:serviceUnavailableShown", "true");
+          if (pathname !== "/service-not-available") {
+            window.location.replace("/service-not-available");
+          }
         }
       });
   }, [latitude, longitude, pathname]);
