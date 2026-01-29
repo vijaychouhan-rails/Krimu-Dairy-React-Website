@@ -22,7 +22,7 @@ import { toast } from 'react-toastify';
 import logo from "../../assets/logo.png";
 
 function Dashboard() {
-  const { latitude, longitude } = useSelector(
+  const { latitude, longitude, isServiceAvailable } = useSelector(
     (state: RootState) => state.location
   );
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -225,9 +225,10 @@ function Dashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {category.products.map((product: Product) => (
-                    <Card key={product.id} className="group hover:shadow-card transition-all duration-300">
+                    <Card key={product.id} className={`group hover:shadow-card transition-all duration-300 ${!isServiceAvailable ? "opacity-60 pointer-events-none" : ""}`}>
                       <CardContent className="p-0">
-                        <Link href={`/product/${product.id}`}
+                        <Link href={isServiceAvailable ? `/product/${product.id}` : "#"}
+                          className={!isServiceAvailable ? "cursor-not-allowed pointer-events-none" : ""}
                         >
                           <div className="relative overflow-hidden rounded-t-lg">
                             {product.pic ? (
@@ -276,11 +277,12 @@ function Dashboard() {
                             <div className="flex items-center justify-between">
                               <span className="text-2xl font-bold text-primary">₹{product.price}</span>
                               {cartItems.some((item) => item.id === product.id) ? (
-                                <div className="flex items-center gap-2">
+                                <div className={`flex items-center gap-2 ${!isServiceAvailable ? "pointer-events-auto" : ""}`}>
                                   <Button
                                     variant="outline"
                                     size="icon"
                                     className="h-8 w-8"
+                                    disabled={!isServiceAvailable}
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
@@ -309,6 +311,7 @@ function Dashboard() {
                                     variant="outline"
                                     size="icon"
                                     className="h-8 w-8"
+                                    disabled={!isServiceAvailable}
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
@@ -328,7 +331,8 @@ function Dashboard() {
                                 </div>
                               ) : (
                                 <Button
-                                  disabled={!product.in_stock || !product.available_on_location}
+                                  disabled={!product.in_stock || !product.available_on_location || !isServiceAvailable}
+                                  className={!isServiceAvailable ? "pointer-events-auto" : ""}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -349,7 +353,9 @@ function Dashboard() {
                                     ? "Sold Out"
                                     : !product.available_on_location
                                       ? "Unavailable"
-                                      : "Add to Cart"}
+                                      : !isServiceAvailable
+                                        ? "Unavailable"
+                                        : "Add to Cart"}
                                 </Button>
                               )}
                             </div>

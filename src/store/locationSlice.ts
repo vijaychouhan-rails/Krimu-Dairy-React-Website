@@ -11,7 +11,8 @@ interface LocationState {
   house_number: string;
   street: string;
   landmark: string;
-}
+  isServiceAvailable: boolean | null;
+};
 
 const initialState: LocationState = {
   latitude: "",
@@ -24,6 +25,7 @@ const initialState: LocationState = {
   house_number: "",
   street: "",
   landmark: "",
+  isServiceAvailable: null,
 };
 
 const locationSlice = createSlice({
@@ -59,8 +61,11 @@ const locationSlice = createSlice({
       if (action.payload.street !== undefined) state.street = action.payload.street;
       if (action.payload.landmark !== undefined) state.landmark = action.payload.landmark;
     },
+    setServiceAvailability: (state, action: PayloadAction<boolean | null>) => {
+      state.isServiceAvailable = action.payload;
+    },
   },
 });
 
-export const { setLocation, setLocationAddress } = locationSlice.actions;
+export const { setLocation, setLocationAddress, setServiceAvailability } = locationSlice.actions;
 export default locationSlice.reducer;
